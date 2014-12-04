@@ -112,6 +112,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Radio.fs" />
+    <Compile Include="Digit.fs" />
     <Compile Include="Toolbar.fs" />
     <Compile Include="RadioClockViewController.fs" />
     <Compile Include="AppDelegate.fs" />
@@ -119,5 +120,7 @@
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\iOS\Xamarin.MonoTouch.FSharp.targets" />
   <ItemGroup>
     <BundleResource Include="Resources\timer-32.png" />
+    <BundleResource Include="Resources\alarm_clock-32.png" />
+    <BundleResource Include="Resources\radio-32.png" />
   </ItemGroup>
 </Project>

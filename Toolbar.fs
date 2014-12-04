@@ -15,6 +15,7 @@ type Toolbar(rect) as this =
        btn.Style <- UIBarButtonItemStyle.Plain
        btn.Clicked.Add(clickAction)
 
+       this.TranslatesAutoresizingMaskIntoConstraints <- false  // important for auto layout!
        this.Frame <- new RectangleF(0.0f, rect.Bottom - 44.0f, rect.Width, 44.0f)
        this.Items <- [|btn|]
 
