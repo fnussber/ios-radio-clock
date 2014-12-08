@@ -7,16 +7,15 @@ open MonoTouch.CoreGraphics
 open MonoTouch.Foundation
 open MonoTouch.UIKit
 
-type Digit(digit: String, pos: float32) as self =
+type Digit(digit: String) as self =
     inherit UILabel()
 
+    let font = UIFont.FromName("Helvetica", 100.0f)
     let duration = 1.0
 
     do
         self.TranslatesAutoresizingMaskIntoConstraints <- false  // important for auto layout!
-//        self.Frame <- new RectangleF(225.0f + pos * 150.0f, 225.0f, 150.0f, 150.0f)
-//        self.Bounds <- new RectangleF(0.0f, 0.0f, 150.0f, 150.0f)
-        self.Font <- UIFont.FromName("Helvetica", 100.0f)
+        self.Font <- font
         self.Text <- digit
         self.TextAlignment <- UITextAlignment.Center
         self.TextColor <- UIColor.Black
@@ -46,8 +45,8 @@ type Digit(digit: String, pos: float32) as self =
 
         // --- animate along curve
         let path = new UIBezierPath()
-        path.MoveTo(new PointF(this.Center.X - 300.0f, this.Center.Y - 200.0f))
-        path.AddQuadCurveToPoint(this.Center, new PointF(this.Center.X - 300.0f, this.Center.Y))
+        path.MoveTo(new PointF(this.Center.X - 300.0f, this.Center.Y + 200.0f))
+        path.AddQuadCurveToPoint(this.Center, new PointF(this.Center.X, this.Center.Y + 200.0f))
         let anim = CAKeyFrameAnimation.GetFromKeyPath("position")
         anim.Duration <- 1.0
         anim.Path <- path.CGPath
@@ -101,12 +100,12 @@ type Digit(digit: String, pos: float32) as self =
         UIView.Animate(0.9, 0.0, UIViewAnimationOptions.CurveEaseOut, new NSAction(fun () -> self.Alpha <- 0.0f), null)
 
 
-type Digit2(pos: float32) as this =
+type Digit2() as this =
     inherit UIView()
 
     let mutable d = 0
-    let label0 = new Digit(d.ToString(), pos)
-    let label1 = new Digit(((d+1)%10).ToString(), pos)
+    let label0 = new Digit(d.ToString())
+    let label1 = new Digit(d.ToString())
 
     do
         this.TranslatesAutoresizingMaskIntoConstraints <- false  // important for auto layout!
@@ -124,29 +123,32 @@ type Digit2(pos: float32) as this =
         this.AddConstraints(cv1)
 
 
+    member this.Digit = d
     member this.Label0 = label0
     member this.Label1 = label1
 
-    member this.Next() =
-        printfn "next 0"
+    member this.Next(next: int) =
         label0.InvokeOnMainThread(new NSAction(fun _ ->
-            label0.AnimateOut()
-            label1.AnimateIn()
-            d <- (d+1)%10
-            label0.Text <- d.ToString()
-            label1.Text <- ((d+1)%10).ToString()))
-        printfn "next 1"
+                label0.AnimateOut()
+                label1.AnimateIn()
+                label0.Text <- d.ToString()
+                label1.Text <- (next.ToString())
+                d <- next
+                )
+            )
 
 
 type Clock() as this =
     inherit UIView()
 
-    let h1 = new Digit2(-1.0f)
-    let h0 = new Digit2(0.0f)
-    let m1 = new Digit2(1.0f)
-    let m0 = new Digit2(2.0f)
-    let s1 = new Digit2(3.0f)
-    let s0 = new Digit2(4.0f)
+    let h1 = new Digit2()
+    let h0 = new Digit2()
+//    let c0 = new UILabel(Text=":") TODO: add colons! as separators
+    let m1 = new Digit2()
+    let m0 = new Digit2()
+//    let c1 = new UILabel(Text=":")
+    let s1 = new Digit2()
+    let s0 = new Digit2()
 
     do
         this.TranslatesAutoresizingMaskIntoConstraints <- false  // important for auto layout!
@@ -173,16 +175,27 @@ type Clock() as this =
         this.AddConstraints(cv5)
         this.AddConstraints(cv6)
 
-        this.DoIt(h1)
-        this.DoIt(h0)
-        this.DoIt(m1)
-        this.DoIt(m0)
-        this.DoIt(s1)
-        this.DoIt(s0)
+        this.DoIt()
 
-    member this.DoIt(d: Digit2) =
-        let timer = new System.Timers.Timer(5000.0)
-        timer.Elapsed.Add(fun _ -> printfn "next"; d.Next())
+    member this.DoIt() =
+        let timer = new System.Timers.Timer(1000.0)
+        timer.Elapsed.Add(fun _ -> this.Pulse())
         timer.Start()
-        printfn("Waiting")
+
+    member this.Pulse() =
+        let now = System.DateTime.Now
+        let (nh1, nh0) = (now.Hour / 10, now.Hour % 10)
+        let (nm1, nm0) = (now.Minute / 10, now.Minute % 10)
+        let (ns1, ns0) = (now.Second / 10, now.Second % 10)
+        if s0.Digit <> ns0 then s0.Next(ns0) 
+        if s1.Digit <> ns1 then s1.Next(ns1) 
+        if m0.Digit <> nm0 then m0.Next(nm0) 
+        if m1.Digit <> nm1 then m1.Next(nm1) 
+        if h0.Digit <> nh0 then h0.Next(nh0) 
+        if h1.Digit <> nh1 then h1.Next(nh1) 
+
+
+
+         
+
 
