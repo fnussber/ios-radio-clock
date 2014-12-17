@@ -12,25 +12,32 @@ type Digit(digit: String) as self =
 
     let font = UIFont.FromName("Helvetica", 100.0f)
     let duration = 1.0
+    let random = System.Random()
 
     do
         self.TranslatesAutoresizingMaskIntoConstraints <- false  // important for auto layout!
         self.Font <- font
         self.Text <- digit
         self.TextAlignment <- UITextAlignment.Center
-        self.TextColor <- UIColor.Black
+        self.BackgroundColor <- new UIColor(float32(random.NextDouble()), 0.0f, 0.0f, 0.5f)
+        self.TextColor <- UIColor.White
+
+    member this.Blink() =
+        // --- scale animation
+        let scaleAnim = CABasicAnimation.FromKeyPath("transform.scale")
+        scaleAnim.TimingFunction <- CAMediaTimingFunction.FromName(CAMediaTimingFunction.EaseInEaseOut)
+        scaleAnim.Duration <- 0.5
+        scaleAnim.RepeatCount <- 1000.0f // howto: Endless repeat?
+        scaleAnim.AutoReverses <- true
+        //scaleAnim.RemovedOnCompletion <- true
+        scaleAnim.To <- NSNumber.FromDouble(1.5)
+        self.Layer.AddAnimation(scaleAnim, "blinkAnim")
+
+    member this.StopBlink() =
+        self.Layer.RemoveAnimation("blinkAnim")
+
 
     member this.AnimateIn() =
-
-        // --- scale animation
-//        let scaleAnim = CABasicAnimation.FromKeyPath("transform.scale")
-//        scaleAnim.TimingFunction <- CAMediaTimingFunction.FromName(CAMediaTimingFunction.EaseInEaseOut)
-//        scaleAnim.Duration <- 0.5
-//        scaleAnim.RepeatCount <- 8.0f
-//        scaleAnim.AutoReverses <- true
-//        scaleAnim.RemovedOnCompletion <- true
-//        scaleAnim.To <- NSNumber.FromDouble(1.2) //new NSObject(CATransform3D.MakeScale(1.2f, 1.2f, 1.0f))
-//        self.Layer.AddAnimation(scaleAnim, "scaleAnim")
 
         // --- rotate animation
         let rotAnim = CABasicAnimation.FromKeyPath("transform.rotation")
@@ -45,8 +52,10 @@ type Digit(digit: String) as self =
 
         // --- animate along curve
         let path = new UIBezierPath()
-        path.MoveTo(new PointF(this.Center.X - 300.0f, this.Center.Y + 200.0f))
-        path.AddQuadCurveToPoint(this.Center, new PointF(this.Center.X, this.Center.Y + 200.0f))
+        let dx = float32((random.Next() % 800) - 400) // -300.0f
+        let dy = float32((random.Next() % 500) - 250) // +200.0f
+        path.MoveTo(new PointF(this.Center.X + dx, this.Center.Y + dy))
+        path.AddQuadCurveToPoint(this.Center, new PointF(this.Center.X, this.Center.Y + dy))
         let anim = CAKeyFrameAnimation.GetFromKeyPath("position")
         anim.Duration <- 1.0
         anim.Path <- path.CGPath
@@ -55,23 +64,23 @@ type Digit(digit: String) as self =
         //anim.RemovedOnCompletion <- true
         self.Layer.AddAnimation(anim, "moveAnim")
 
-        // --- bang animation
-//        let rotAnim2 = CABasicAnimation.FromKeyPath("transform.rotation")
-//        rotAnim2.TimeOffset <- 1.0
-//        rotAnim2.Duration <- 0.3
-//        rotAnim2.RepeatCount <- 2.0f
-//        rotAnim2.AutoReverses <- true
-//        rotAnim2.RemovedOnCompletion <- true
-//        rotAnim2.From <- NSNumber.FromDouble(0.0)
-//        rotAnim2.To <- NSNumber.FromDouble(-Math.PI/10.0)
-//        self.Layer.AddAnimation(rotAnim2, "rotAnim2")
-
-        // --- fade out
+        // --- fade in
         self.Alpha <- 0.0f
         UIView.Animate(0.9, 0.0, UIViewAnimationOptions.CurveEaseIn, new NSAction(fun () -> self.Alpha <- 1.0f), null)
 
   
     member this.AnimateOut() =
+
+        // --- scale animation
+        let scaleAnim = CABasicAnimation.FromKeyPath("transform.scale")
+        scaleAnim.TimingFunction <- CAMediaTimingFunction.FromName(CAMediaTimingFunction.EaseInEaseOut)
+        scaleAnim.Duration <- 0.25
+        scaleAnim.RepeatCount <- 1.0f
+        scaleAnim.AutoReverses <- true
+        //scaleAnim.RemovedOnCompletion <- true
+        scaleAnim.To <- NSNumber.FromDouble(1.8)
+        self.Layer.AddAnimation(scaleAnim, "scaleAnim")
+
         // --- rotate animation
         let rotAnim = CABasicAnimation.FromKeyPath("transform.rotation")
         rotAnim.TimingFunction <- CAMediaTimingFunction.FromName(CAMediaTimingFunction.EaseInEaseOut)
@@ -85,8 +94,10 @@ type Digit(digit: String) as self =
 
         // --- animate along curve
         let path = new UIBezierPath()
+        let dx = float32((random.Next() % 800) - 400) // +300.0f
+        let dy = float32((random.Next() % 500) - 250) // -200.0f
         path.MoveTo(this.Center)
-        path.AddQuadCurveToPoint(new PointF(this.Center.X + 300.0f, this.Center.Y - 200.0f), new PointF(this.Center.X, this.Center.Y - 200.0f))
+        path.AddQuadCurveToPoint(new PointF(this.Center.X + dx, this.Center.Y + dy), new PointF(this.Center.X, this.Center.Y + dy))
         let anim = CAKeyFrameAnimation.GetFromKeyPath("position")
         anim.Duration <- 1.0
         anim.Path <- path.CGPath
@@ -100,7 +111,8 @@ type Digit(digit: String) as self =
         UIView.Animate(0.9, 0.0, UIViewAnimationOptions.CurveEaseOut, new NSAction(fun () -> self.Alpha <- 0.0f), null)
 
 
-type Digit2() as this =
+//[<AbstractClass>]
+type Digit2(up: NSAction, down: NSAction) as this =
     inherit UIView()
 
     let mutable d = 0
@@ -122,78 +134,169 @@ type Digit2() as this =
         this.AddConstraints(cv0)
         this.AddConstraints(cv1)
 
+        let swipeUp = new UISwipeGestureRecognizer(up)//new NSAction(fun _ -> this.Next(d + 1)))
+        swipeUp.Direction <- UISwipeGestureRecognizerDirection.Up 
+        let swipeDown = new UISwipeGestureRecognizer(new NSAction(fun _ -> this.Next(d - 1)))
+        swipeDown.Direction <- UISwipeGestureRecognizerDirection.Down 
+        let swipeLeft = new UISwipeGestureRecognizer(new NSAction(fun _ -> this.Next(d - 1)))
+        swipeLeft.Direction <- UISwipeGestureRecognizerDirection.Left 
+        let swipeRight = new UISwipeGestureRecognizer(new NSAction(fun _ -> this.Next(d + 1)))
+        swipeRight.Direction <- UISwipeGestureRecognizerDirection.Right 
+        this.AddGestureRecognizer(swipeUp)
+        this.AddGestureRecognizer(swipeDown)
+        this.AddGestureRecognizer(swipeLeft)
+        this.AddGestureRecognizer(swipeRight)
+
+
+//    abstract Bgc: unit -> UIColor
 
     member this.Digit = d
     member this.Label0 = label0
     member this.Label1 = label1
 
+    member this.StopBlink() =
+        label1.StopBlink()
+
+    member this.Blink() =
+        label1.Blink()
+
     member this.Next(next: int) =
+        printfn "next"
         label0.InvokeOnMainThread(new NSAction(fun _ ->
                 label0.AnimateOut()
                 label1.AnimateIn()
                 label0.Text <- d.ToString()
                 label1.Text <- (next.ToString())
                 d <- next
+//                let cb = this.Bgc()
+//                this.BackgroundColor <- cb
+//                let c = this.Bgc()
+//                label0.BackgroundColor <- c
+//                label1.BackgroundColor <- c
                 )
             )
+
+
+//type DigitH() =
+//    inherit Digit2()
+//    let random = System.Random()
+//    override this.Bgc() = new UIColor(float32(random.NextDouble()) + 0.3f, 0.0f, 0.0f, 0.5f)
+
+//type DigitM() =
+//    inherit Digit2()
+//    let random = System.Random()
+//    override this.Bgc() = new UIColor(0.0f, float32(random.NextDouble()) + 0.3f, 0.0f, 0.5f)
+
+//type DigitS() =
+//    inherit Digit2()
+//    let random = System.Random()
+//    override this.Bgc() = new UIColor(0.0f, 0.0f, float32(random.NextDouble()) + 0.3f, 0.5f)
+
+//[<AbstractClass>]
+type TwoDigits(maxValue: int) as this =
+    inherit UIView()
+
+    let up   x  = new NSAction(fun _ -> this.Up(x))
+    let down x  = new NSAction(fun _ -> this.Down(x))
+
+    let d1      = new Digit2(up(10), down(10))
+    let d0      = new Digit2(up(1), down(1))
+
+
+    do
+        this.TranslatesAutoresizingMaskIntoConstraints <- false  // important for auto layout!
+        this.AddSubview(d1) 
+        this.AddSubview(d0)
+
+        let metrics = new NSDictionary()
+        let views = new NSDictionary("d1", d1, "d0", d0)
+        let ch = NSLayoutConstraint.FromVisualFormat("H:|[d1][d0(==d1)]|", NSLayoutFormatOptions.DirectionLeadingToTrailing, metrics, views) 
+        let cv1 = NSLayoutConstraint.FromVisualFormat("V:|[d1]|", NSLayoutFormatOptions.DirectionLeadingToTrailing, metrics, views) 
+        let cv2 = NSLayoutConstraint.FromVisualFormat("V:|[d0]|", NSLayoutFormatOptions.DirectionLeadingToTrailing, metrics, views) 
+        this.AddConstraints(ch)
+        this.AddConstraints(cv1)
+        this.AddConstraints(cv2)
+
+    member this.Blink() =
+        d1.Blink()
+        d0.Blink()
+
+    member this.StopBlink() =
+        d1.StopBlink()
+        d0.StopBlink()
+
+    member this.Value = d1.Digit * 10 + d0.Digit
+
+    member this.Next(d: int) = 
+        if d1.Digit <> d/10 then d1.Next(d/10)
+        if d0.Digit <> d%10 then d0.Next(d%10)
+
+    member this.Up(x: int)   = if this.Value + x < maxValue then this.Next(this.Value + x) else this.Next(d0.Digit)
+    member this.Down(x: int) = if this.Value - x >= 0 then this.Next(this.Value - x) else this.Next(maxValue - 1)
+
 
 
 type Clock() as this =
     inherit UIView()
 
-    let h1 = new Digit2()
-    let h0 = new Digit2()
-//    let c0 = new UILabel(Text=":") TODO: add colons! as separators
-    let m1 = new Digit2()
-    let m0 = new Digit2()
-//    let c1 = new UILabel(Text=":")
-    let s1 = new Digit2()
-    let s0 = new Digit2()
+    let mutable stopped = true
+
+    let timer = new System.Timers.Timer(1000.0)
+
+    let hh = new TwoDigits(24)
+    let mm = new TwoDigits(60)
+    let ss = new TwoDigits(60)
 
     do
         this.TranslatesAutoresizingMaskIntoConstraints <- false  // important for auto layout!
-        this.AddSubview(h1) // use list..
-        this.AddSubview(h0)
-        this.AddSubview(m1)
-        this.AddSubview(m0)
-        this.AddSubview(s1)
-        this.AddSubview(s0)
+        this.AddSubview(hh) // use list..
+        this.AddSubview(mm)
+        this.AddSubview(ss)
         let metrics = new NSDictionary()
-        let views = new NSDictionary("h1", h1, "h0", h0, "m1", m1, "m0", m0, "s1", s1, "s0", s0)
-        let ch = NSLayoutConstraint.FromVisualFormat("H:|[h1][h0(==h1)][m1(==h0)][m0(==m1)][s1(==m0)][s0(==s1)]|", NSLayoutFormatOptions.DirectionLeadingToTrailing, metrics, views) 
-        let cv1 = NSLayoutConstraint.FromVisualFormat("V:|[h1]|", NSLayoutFormatOptions.DirectionLeadingToTrailing, metrics, views) 
-        let cv2 = NSLayoutConstraint.FromVisualFormat("V:|[h0]|", NSLayoutFormatOptions.DirectionLeadingToTrailing, metrics, views) 
-        let cv3 = NSLayoutConstraint.FromVisualFormat("V:|[m1]|", NSLayoutFormatOptions.DirectionLeadingToTrailing, metrics, views) 
-        let cv4 = NSLayoutConstraint.FromVisualFormat("V:|[m0]|", NSLayoutFormatOptions.DirectionLeadingToTrailing, metrics, views) 
-        let cv5 = NSLayoutConstraint.FromVisualFormat("V:|[s1]|", NSLayoutFormatOptions.DirectionLeadingToTrailing, metrics, views) 
-        let cv6 = NSLayoutConstraint.FromVisualFormat("V:|[s0]|", NSLayoutFormatOptions.DirectionLeadingToTrailing, metrics, views) 
+        let views = new NSDictionary("hh", hh, "mm", mm, "ss", ss)
+        let ch = NSLayoutConstraint.FromVisualFormat("H:|[hh][mm(==hh)][ss(==mm)]|", NSLayoutFormatOptions.DirectionLeadingToTrailing, metrics, views) 
+        let cv1 = NSLayoutConstraint.FromVisualFormat("V:|[hh]|", NSLayoutFormatOptions.DirectionLeadingToTrailing, metrics, views) 
+        let cv2 = NSLayoutConstraint.FromVisualFormat("V:|[mm]|", NSLayoutFormatOptions.DirectionLeadingToTrailing, metrics, views) 
+        let cv3 = NSLayoutConstraint.FromVisualFormat("V:|[ss]|", NSLayoutFormatOptions.DirectionLeadingToTrailing, metrics, views) 
         this.AddConstraints(ch)
         this.AddConstraints(cv1)
         this.AddConstraints(cv2)
         this.AddConstraints(cv3)
-        this.AddConstraints(cv4)
-        this.AddConstraints(cv5)
-        this.AddConstraints(cv6)
 
-        this.DoIt()
-
-    member this.DoIt() =
-        let timer = new System.Timers.Timer(1000.0)
         timer.Elapsed.Add(fun _ -> this.Pulse())
-        timer.Start()
+
+
+    member this.Time() =
+        new TimeSpan(hh.Value, mm.Value, ss.Value)
+
+    member this.IsStopped() =
+        stopped
+
+    member this.Start() =
+        timer.Start()   // sync needed?
+        stopped <- false
+
+    member this.Stop() =
+        timer.Stop()
+        stopped <- true
+
+    member this.Blink() =
+        hh.Blink() // put all digits in an interable container
+        mm.Blink()
+
+    member this.StopBlink() =
+        hh.StopBlink() // put all digits in an interable container
+        mm.StopBlink()
 
     member this.Pulse() =
         let now = System.DateTime.Now
-        let (nh1, nh0) = (now.Hour / 10, now.Hour % 10)
-        let (nm1, nm0) = (now.Minute / 10, now.Minute % 10)
-        let (ns1, ns0) = (now.Second / 10, now.Second % 10)
-        if s0.Digit <> ns0 then s0.Next(ns0) 
-        if s1.Digit <> ns1 then s1.Next(ns1) 
-        if m0.Digit <> nm0 then m0.Next(nm0) 
-        if m1.Digit <> nm1 then m1.Next(nm1) 
-        if h0.Digit <> nh0 then h0.Next(nh0) 
-        if h1.Digit <> nh1 then h1.Next(nh1) 
+        hh.Next(now.Hour)
+        mm.Next(now.Minute)
+        ss.Next(now.Second)
 
+    member this.Is24Hours() =
+        let format = NSDateFormatter.GetDateFormatFromTemplate("j", uint32(0), NSLocale.CurrentLocale)
+        format.IndexOf('a') = -1
 
 
          
