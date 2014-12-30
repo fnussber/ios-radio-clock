@@ -134,13 +134,13 @@ type Digit2(up: NSAction, down: NSAction) as this =
         this.AddConstraints(cv0)
         this.AddConstraints(cv1)
 
-        let swipeUp = new UISwipeGestureRecognizer(up)//new NSAction(fun _ -> this.Next(d + 1)))
+        let swipeUp = new UISwipeGestureRecognizer(up)
         swipeUp.Direction <- UISwipeGestureRecognizerDirection.Up 
-        let swipeDown = new UISwipeGestureRecognizer(new NSAction(fun _ -> this.Next(d - 1)))
+        let swipeDown = new UISwipeGestureRecognizer(down)
         swipeDown.Direction <- UISwipeGestureRecognizerDirection.Down 
-        let swipeLeft = new UISwipeGestureRecognizer(new NSAction(fun _ -> this.Next(d - 1)))
+        let swipeLeft = new UISwipeGestureRecognizer(up)
         swipeLeft.Direction <- UISwipeGestureRecognizerDirection.Left 
-        let swipeRight = new UISwipeGestureRecognizer(new NSAction(fun _ -> this.Next(d + 1)))
+        let swipeRight = new UISwipeGestureRecognizer(down)
         swipeRight.Direction <- UISwipeGestureRecognizerDirection.Right 
         this.AddGestureRecognizer(swipeUp)
         this.AddGestureRecognizer(swipeDown)
@@ -196,11 +196,11 @@ type Digit2(up: NSAction, down: NSAction) as this =
 type TwoDigits(maxValue: int) as this =
     inherit UIView()
 
-    let up   x  = new NSAction(fun _ -> this.Up(x))
     let down x  = new NSAction(fun _ -> this.Down(x))
+    let up   x  = new NSAction(fun _ -> this.Up(x))
 
-    let d1      = new Digit2(up(10), down(10))
-    let d0      = new Digit2(up(1), down(1))
+    let d1      = new Digit2(down(10), up(10))
+    let d0      = new Digit2(down(1), up(1))
 
 
     do
@@ -231,8 +231,11 @@ type TwoDigits(maxValue: int) as this =
         if d1.Digit <> d/10 then d1.Next(d/10)
         if d0.Digit <> d%10 then d0.Next(d%10)
 
-    member this.Up(x: int)   = if this.Value + x < maxValue then this.Next(this.Value + x) else this.Next(d0.Digit)
-    member this.Down(x: int) = if this.Value - x >= 0 then this.Next(this.Value - x) else this.Next(maxValue - 1)
+    member this.Up(x: int)   = 
+        if this.Value + x < maxValue then this.Next(this.Value + x) else this.Next(0)
+
+    member this.Down(x: int) = 
+        if (this.Value - x) >= 0 then this.Next(this.Value - x) else this.Next(maxValue - 1)
 
 
 

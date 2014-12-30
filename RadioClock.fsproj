@@ -102,9 +102,11 @@
     <Reference Include="mscorlib" />
     <Reference Include="FSharp.Core" />
     <Reference Include="monotouch" />
+    <Reference Include="System.Runtime.Serialization" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Resources\" />
+    <Folder Include="Resources\weather\" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Info.plist" />
@@ -116,11 +118,26 @@
     <Compile Include="Toolbar.fs" />
     <Compile Include="RadioClockViewController.fs" />
     <Compile Include="AppDelegate.fs" />
+    <Compile Include="WeatherStation.fs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\iOS\Xamarin.MonoTouch.FSharp.targets" />
   <ItemGroup>
     <BundleResource Include="Resources\timer-32.png" />
     <BundleResource Include="Resources\alarm_clock-32.png" />
     <BundleResource Include="Resources\radio-32.png" />
+    <BundleResource Include="Resources\weather\clouds-50.png" />
+    <BundleResource Include="Resources\weather\downpour-50.png" />
+    <BundleResource Include="Resources\weather\fog_day-50.png" />
+    <BundleResource Include="Resources\weather\fog_night-50.png" />
+    <BundleResource Include="Resources\weather\little_snow-50.png" />
+    <BundleResource Include="Resources\weather\moon-50.png" />
+    <BundleResource Include="Resources\weather\partly_cloudy_day-50.png" />
+    <BundleResource Include="Resources\weather\partly_cloudy_night-50.png" />
+    <BundleResource Include="Resources\weather\partly_cloudy_rain-50.png" />
+    <BundleResource Include="Resources\weather\rain-50.png" />
+    <BundleResource Include="Resources\weather\snow-50.png" />
+    <BundleResource Include="Resources\weather\storm-50.png" />
+    <BundleResource Include="Resources\weather\sun-50.png" />
+    <BundleResource Include="Resources\weather\unknown.png" />
   </ItemGroup>
 </Project>

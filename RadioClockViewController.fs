@@ -20,10 +20,12 @@ type RadioClockViewController() =
 
         let clock = new Clock()
         let toolbar = new Toolbar (clock)
+        let weather = new WeatherStation()
 
         this.View.BackgroundColor <- UIColor.Black
         this.View.AddSubview (clock)
         this.View.AddSubview (toolbar)
+  
 
         let metrics = new NSDictionary()
         let views = new NSDictionary("toolbar", toolbar, "clock", clock)
