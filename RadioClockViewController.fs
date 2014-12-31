@@ -18,12 +18,15 @@ type RadioClockViewController() =
     override this.ViewDidLoad() = 
         base.ViewDidLoad()
 
-        let msgSequence = Seq.unfold(fun state -> if (state > 20) then None else Some(state, state + 1)) 0 |> Seq.map (fun m -> m.ToString())
+        let weather = new WeatherStation()
+        let news = new NewsStation()
+
+//        let msgSequence = Seq.unfold(fun state -> if (state > 20) then None else Some(state, state + 1)) 0 |> Seq.map (fun m -> m.ToString())
+        let msgSequence = news.Stories()
 
         let clock = new Clock()
         let toolbar = new Toolbar (clock)
         let ticker = new Ticker(msgSequence)
-        let weather = new WeatherStation()
 
         this.View.BackgroundColor <- UIColor.Black
         this.View.AddSubview (clock)

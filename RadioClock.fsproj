@@ -117,6 +117,7 @@
     <Compile Include="Radio.fs" />
     <Compile Include="Digit.fs" />
     <Compile Include="Toolbar.fs" />
+    <Compile Include="NewsStation.fs" />
     <Compile Include="WeatherStation.fs" />
     <Compile Include="RadioClockViewController.fs" />
     <Compile Include="AppDelegate.fs" />

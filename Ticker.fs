@@ -25,7 +25,7 @@ type Ticker(msgStream: seq<string>) as t =
 
     let msgStreamEnum = msgStream.GetEnumerator()
 
-    let nextMessage() = if msgStreamEnum.MoveNext() then msgStreamEnum.Current else "EOF"
+    let nextMessage() = if msgStreamEnum.MoveNext() then msgStreamEnum.Current else msgStreamEnum.Dispose(); "EOF"
 
     let rec scrollOut() =
         UIView.Animate(2.0, 2.0, UIViewAnimationOptions.CurveLinear, new NSAction(fun () -> message.Center <- new PointF (message.Center.X - 1000.0f, message.Center.Y)), new NSAction(fun () -> scrollIn()))
