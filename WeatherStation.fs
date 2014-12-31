@@ -5,6 +5,9 @@ open System.IO
 open System.Net
 open System.Text
 open System.Xml
+open MonoTouch.CoreLocation
+open MonoTouch.CoreGraphics
+open MonoTouch.Foundation
 open MonoTouch.UIKit
 
 // Unfortunately we can't use the tools from FSharp.Data like type providers etc. because including
@@ -14,27 +17,29 @@ open MonoTouch.UIKit
 /// Simple weather station that uses our current location to get weather information from openeweathermap.org
 type WeatherStation() =
 
+    let locationManager = new CLLocationManager()
+
     // Defines a translation from openweather icon names to the ones we are using here
     // See http://bugs.openweathermap.org/projects/api/wiki/Weather_Condition_Codes for details
     let icons =
-        [ "01d.png", "sun-50.png";                      // sky is clear
-          "01n.png", "moon-50.png";
-          "02d.png", "partly_cloudy_day-50.png";        // few clouds
-          "02n.png", "partly_cloudy_night-50.png";
-          "03d.png", "clouds-50.png";                   // scattered clouds
-          "03n.png", "clouds-50.png";
-          "04d.png", "clouds-50.png";                   // broken clouds
-          "04n.png", "clouds-50.png";
-          "09d.png", "rain-50.png";                     // shower rain
-          "09n.png", "rain-50.png";
-          "10d.png", "partly_cloudy_rain-50.png";       // rain
-          "10n.png", "rain-50.png";
-          "11d.png", "storm-50.png";                    // thunderstorm
-          "11n.png", "storm-50.png";
-          "13d.png", "snow-50.png";                     // snow    
-          "13n.png", "snow-50.png";
-          "50d.png", "fog_day-50.png";                  // mist
-          "50n.png", "fog_night-50.png";
+        [ "01d", "sun-50.png";                      // sky is clear
+          "01n", "moon-50.png";
+          "02d", "partly_cloudy_day-50.png";        // few clouds
+          "02n", "partly_cloudy_night-50.png";
+          "03d", "clouds-50.png";                   // scattered clouds
+          "03n", "clouds-50.png";
+          "04d", "clouds-50.png";                   // broken clouds
+          "04n", "clouds-50.png";
+          "09d", "rain-50.png";                     // shower rain
+          "09n", "rain-50.png";
+          "10d", "partly_cloudy_rain-50.png";       // rain
+          "10n", "rain-50.png";
+          "11d", "storm-50.png";                    // thunderstorm
+          "11n", "storm-50.png";
+          "13d", "snow-50.png";                     // snow    
+          "13n", "snow-50.png";
+          "50d", "fog_day-50.png";                  // mist
+          "50n", "fog_night-50.png";
           ]
         |> Map.ofList 
         |> Map.map (fun key name -> new UIImage("weather/" + name))
@@ -45,7 +50,9 @@ type WeatherStation() =
     /// Gets the icon for the given weather id
     let iconForId name = defaultArg (icons.TryFind name) unknownIcon
 
-    let getWeather (lat: float, long: float) =
+    let getWeather() =
+        let lat = if (locationManager.Location = null) then 0.0 else locationManager.Location.Coordinate.Latitude
+        let long = if (locationManager.Location = null) then 0.0 else locationManager.Location.Coordinate.Longitude
         let url = sprintf "http://api.openweathermap.org/data/2.5/weather?lat=%f&lon=%f&mode=xml" lat long
         let req = HttpWebRequest.Create(url) :?> HttpWebRequest
         let resp = req.GetResponse()
@@ -57,16 +64,58 @@ type WeatherStation() =
         doc.LoadXml xml
         doc
 
-    let value (xml: XmlDocument, value: string) = float((xml.SelectSingleNode("/current/" + value + "/@value")).InnerText)
+    let value (xml: XmlDocument, value: string, attribute: string) = (xml.SelectSingleNode("/current/" + value + "/@" + attribute)).InnerText
 
-    let temperature xml = value (xml, "temperature")
+    let temperature xml = float(value (xml, "temperature", "value"))
 
-    let humidity xml = value (xml, "humidity")
+    let humidity xml = float(value (xml, "humidity", "value"))
 
-    do
-        let xml = getWeather(35.0, 39.0)
+    let weather xml = value (xml, "weather", "value")
+
+    let icon xml = iconForId (value (xml, "weather", "icon"))
+
+    let printWeather xml = 
+//        let coord = locationManager.Location.Coordinate
+//        Console.WriteLine("lat         = " + coord.Latitude.ToString())
+//        Console.WriteLine("long        = " + coord.Longitude.ToString())
         Console.WriteLine("temperature = " + temperature(xml).ToString())
         Console.WriteLine("humidity    = " + humidity(xml).ToString())
+        Console.WriteLine("weather     = " + weather(xml).ToString())
+        Console.WriteLine("icon        = " + value(xml, "weather", "icon").ToString())
         ()
 
 
+    let weatherView() =
+        let xml = getWeather()
+        printWeather xml
+        let v = new UIView(TranslatesAutoresizingMaskIntoConstraints = false)
+        let icon = new UIImageView(icon(xml)) 
+        let label = new UILabel(Text = weather(xml), TranslatesAutoresizingMaskIntoConstraints = false)
+        icon.TranslatesAutoresizingMaskIntoConstraints <- false
+        v.AddSubview(icon)
+        v.AddSubview(label)
+
+        // layout
+        let metrics = new NSDictionary()
+        let views = new NSDictionary("icon", icon, "label", label)
+        let ch0 = NSLayoutConstraint.FromVisualFormat("H:|[icon(50)][label]|", NSLayoutFormatOptions.DirectionLeadingToTrailing, metrics, views) 
+        let cv0 = NSLayoutConstraint.FromVisualFormat("V:|[icon]|", NSLayoutFormatOptions.DirectionLeadingToTrailing, metrics, views) 
+        let cv1 = NSLayoutConstraint.FromVisualFormat("V:|[label]|", NSLayoutFormatOptions.DirectionLeadingToTrailing, metrics, views) 
+        v.AddConstraints(ch0)
+        v.AddConstraints(cv0)
+        v.AddConstraints(cv1)
+        v
+
+    do
+        // need to ask for iOS 8
+        //if (UIDevice.CurrentDevice.CheckSystemVersion(8, 0)) then locationManager.RequestWhenInUseAuthorization()
+
+        // NOTE: there must be a corresponding entry for NSLocationWhenInUseUsageDescription in Info.plist 
+        // otherwise iOS will never ask permission and no location updates are generated.
+        locationManager.RequestWhenInUseAuthorization()
+//        locationManager.UpdatedLocation |> Event.add(fun evArgs -> Console.WriteLine("NEW POSITION"))
+        locationManager.StartUpdatingLocation()
+         
+
+    member this.Weather(): seq<UIView> =
+        Seq.unfold(fun weather -> Some(weather, weatherView())) (weatherView()) // produce a weather view over and over again, this will in fact reload everytime latest weather info

@@ -21,28 +21,29 @@ type RadioClockViewController() =
         let weather = new WeatherStation()
         let news = new NewsStation()
 
-//        let msgSequence = Seq.unfold(fun state -> if (state > 20) then None else Some(state, state + 1)) 0 |> Seq.map (fun m -> m.ToString())
-        let msgSequence = news.Stories()
-
         let clock = new Clock()
         let toolbar = new Toolbar (clock)
-        let ticker = new Ticker(msgSequence)
+        let newsTicker = new Ticker(news.Stories())
+        let weatherTicker = new Ticker(weather.Weather())
 
         this.View.BackgroundColor <- UIColor.Black
         this.View.AddSubview (clock)
-        this.View.AddSubview (ticker)
+        this.View.AddSubview (weatherTicker)
+        this.View.AddSubview (newsTicker)
         this.View.AddSubview (toolbar)
   
 
         let metrics = new NSDictionary()
-        let views = new NSDictionary("toolbar", toolbar, "ticker", ticker, "clock", clock)
+        let views = new NSDictionary("toolbar", toolbar, "newsTicker", newsTicker, "weatherTicker", weatherTicker, "clock", clock)
         let ch0 = NSLayoutConstraint.FromVisualFormat("H:|[clock]|", NSLayoutFormatOptions.DirectionLeadingToTrailing, metrics, views) 
-        let ch1 = NSLayoutConstraint.FromVisualFormat("H:|[ticker]|", NSLayoutFormatOptions.DirectionLeadingToTrailing, metrics, views) 
-        let ch2 = NSLayoutConstraint.FromVisualFormat("H:|[toolbar]|", NSLayoutFormatOptions.DirectionLeadingToTrailing, metrics, views) 
-        let cv = NSLayoutConstraint.FromVisualFormat("V:|[clock][ticker(44)][toolbar(44)]|", NSLayoutFormatOptions.DirectionLeadingToTrailing, metrics, views) 
+        let ch1 = NSLayoutConstraint.FromVisualFormat("H:|[weatherTicker]|", NSLayoutFormatOptions.DirectionLeadingToTrailing, metrics, views) 
+        let ch2 = NSLayoutConstraint.FromVisualFormat("H:|[newsTicker]|", NSLayoutFormatOptions.DirectionLeadingToTrailing, metrics, views) 
+        let ch3 = NSLayoutConstraint.FromVisualFormat("H:|[toolbar]|", NSLayoutFormatOptions.DirectionLeadingToTrailing, metrics, views) 
+        let cv = NSLayoutConstraint.FromVisualFormat("V:|[clock][newsTicker(50)][weatherTicker(50)][toolbar(44)]|", NSLayoutFormatOptions.DirectionLeadingToTrailing, metrics, views) 
         this.View.AddConstraints(ch0)
         this.View.AddConstraints(ch1)
         this.View.AddConstraints(ch2)
+        this.View.AddConstraints(ch3)
         this.View.AddConstraints(cv)
 
         clock.Start()

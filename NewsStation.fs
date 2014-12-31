@@ -5,6 +5,7 @@ open System.IO
 open System.Net
 open System.Text
 open System.Xml
+open MonoTouch.UIKit
 
 type NewsStation() = 
 
@@ -36,8 +37,10 @@ type NewsStation() =
             Console.WriteLine("desc  = " + desc)
             l <- title :: l
         l
-       
-    member this.Stories(): seq<string> =
-        Seq.unfold(fun (stories: list<string>) -> if (stories.IsEmpty) then Some("NEW SET", nextStories()) else Some(stories.Head, stories.Tail)) (nextStories())
+
+    let labelFor text = new UILabel(Text = text) :> UIView
+
+    member this.Stories(): seq<UIView> =
+        Seq.unfold(fun (stories: list<string>) -> if (stories.IsEmpty) then Some((labelFor("NEW SET")), nextStories()) else Some(labelFor(stories.Head), stories.Tail)) (nextStories())
 
     
