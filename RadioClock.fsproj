@@ -111,14 +111,15 @@
   <ItemGroup>
     <None Include="Info.plist" />
     <None Include="Entitlements.plist" />
+    <Compile Include="Ticker.fs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Radio.fs" />
     <Compile Include="Digit.fs" />
     <Compile Include="Toolbar.fs" />
+    <Compile Include="WeatherStation.fs" />
     <Compile Include="RadioClockViewController.fs" />
     <Compile Include="AppDelegate.fs" />
-    <Compile Include="WeatherStation.fs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\iOS\Xamarin.MonoTouch.FSharp.targets" />
   <ItemGroup>
