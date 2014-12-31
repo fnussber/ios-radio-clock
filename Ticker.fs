@@ -18,22 +18,26 @@ type Message() as m =
         //m.BackgroundColor <- new UIColor(0.0f, 0.0f, 0.0f, 0.0f)
         m.TextColor <- UIColor.Black
 
-type Ticker() as t = 
+type Ticker(msgStream: seq<string>) as t = 
     inherit UIView()
 
     let message = new Message()
 
-    let scrollOut() =
-        UIView.Animate(5.0, 5.0, UIViewAnimationOptions.CurveLinear, new NSAction(fun () -> message.Center <- new PointF (message.Center.X - 1000.0f, message.Center.Y)), null)
+    let msgStreamEnum = msgStream.GetEnumerator()
 
-    let scrollIn() =
+    let nextMessage() = if msgStreamEnum.MoveNext() then msgStreamEnum.Current else "EOF"
+
+    let rec scrollOut() =
+        UIView.Animate(2.0, 2.0, UIViewAnimationOptions.CurveLinear, new NSAction(fun () -> message.Center <- new PointF (message.Center.X - 1000.0f, message.Center.Y)), new NSAction(fun () -> scrollIn()))
+
+    and scrollIn() =
+        // set text and relayout so that we get the text at the right position (depending on text length etc)
+        message.Text <- nextMessage()
+        t.SetNeedsLayout()
+        t.LayoutIfNeeded()
         let center = message.Center
         message.Center <- new PointF (message.Center.X + 1000.0f, message.Center.Y)
-        UIView.Animate(5.0, 0.0, UIViewAnimationOptions.CurveLinear, new NSAction(fun () -> message.Center <- center), new NSAction(fun () -> scrollOut()))
-
-    let animate text = 
-        message.Text <- text
-        scrollIn()
+        UIView.Animate(2.0, 0.0, UIViewAnimationOptions.CurveLinear, new NSAction(fun () -> message.Center <- center), new NSAction(fun () -> scrollOut()))
 
     do
         t.TranslatesAutoresizingMaskIntoConstraints <- false  // important for auto layout!
@@ -45,6 +49,5 @@ type Ticker() as t =
         let v = NSLayoutConstraint.FromVisualFormat("V:|[m]|", NSLayoutFormatOptions.DirectionLeadingToTrailing, metrics, views) 
         t.AddConstraints(h)
         t.AddConstraints(v)
-
-    member t.Text with set(text) = animate(text)
+        scrollIn() // start consuming messages..
 

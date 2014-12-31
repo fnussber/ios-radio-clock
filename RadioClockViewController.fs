@@ -18,9 +18,11 @@ type RadioClockViewController() =
     override this.ViewDidLoad() = 
         base.ViewDidLoad()
 
+        let msgSequence = Seq.unfold(fun state -> if (state > 20) then None else Some(state, state + 1)) 0 |> Seq.map (fun m -> m.ToString())
+
         let clock = new Clock()
         let toolbar = new Toolbar (clock)
-        let ticker = new Ticker()
+        let ticker = new Ticker(msgSequence)
         let weather = new WeatherStation()
 
         this.View.BackgroundColor <- UIColor.Black
@@ -41,7 +43,6 @@ type RadioClockViewController() =
         this.View.AddConstraints(cv)
 
         clock.Start()
-        ticker.Text <- "Hello world.....       This is a message....."
 
     // Return true for supported orientations
     override this.ShouldAutorotateToInterfaceOrientation(orientation) = true
