@@ -55,7 +55,7 @@ type WeatherStation() =
         let long = if (locationManager.Location = null) then 0.0 else locationManager.Location.Coordinate.Longitude
         let url = sprintf "http://api.openweathermap.org/data/2.5/weather?lat=%f&lon=%f&mode=xml" lat long
         let req = HttpWebRequest.Create(url) :?> HttpWebRequest
-        let resp = req.GetResponse()
+        let resp = req.GetResponse() // throws 501.. etc -> ERROR HANDLING!!!
         let stream = resp.GetResponseStream()
         let reader = new StreamReader(stream)
         let xml = reader.ReadToEnd()

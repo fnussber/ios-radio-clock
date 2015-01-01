@@ -7,7 +7,7 @@ open MonoTouch.CoreGraphics
 open MonoTouch.Foundation
 open MonoTouch.UIKit
 
-type Ticker(msgStream: seq<UIView>) as t = 
+type Ticker(msgStream: seq<UIView>, animationSpeed: float, showDuration: float) as t = 
     inherit UIView()
 
     let mutable message = new UIView()
@@ -24,14 +24,14 @@ type Ticker(msgStream: seq<UIView>) as t =
         t.AddSubview(message)
         let metrics = new NSDictionary()
         let views = new NSDictionary("m", message)
-        let h = NSLayoutConstraint.FromVisualFormat("H:|[m]|", NSLayoutFormatOptions.DirectionLeadingToTrailing, metrics, views) 
+        //let h = NSLayoutConstraint.FromVisualFormat("H:[m(1000)]", NSLayoutFormatOptions.DirectionLeadingToTrailing, metrics, views) 
         let v = NSLayoutConstraint.FromVisualFormat("V:|[m]|", NSLayoutFormatOptions.DirectionLeadingToTrailing, metrics, views) 
-        t.AddConstraints(h)
+        //t.AddConstraints(h)
         t.AddConstraints(v)
 
 
     let rec scrollOut() =
-        UIView.Animate(0.5, 3.0, UIViewAnimationOptions.CurveLinear, new NSAction(fun () -> message.Center <- new PointF (message.Center.X - 1000.0f, message.Center.Y)), new NSAction(fun () -> scrollIn()))
+        UIView.Animate(animationSpeed, showDuration, UIViewAnimationOptions.CurveLinear, new NSAction(fun () -> message.Center <- new PointF (message.Center.X - 1000.0f, message.Center.Y)), new NSAction(fun () -> scrollIn()))
 
     and scrollIn() =
         nextView()
@@ -39,7 +39,7 @@ type Ticker(msgStream: seq<UIView>) as t =
         t.LayoutIfNeeded()
         let center = message.Center
         message.Center <- new PointF (message.Center.X + 1000.0f, message.Center.Y)
-        UIView.Animate(0.5, 0.0, UIViewAnimationOptions.CurveLinear, new NSAction(fun () -> message.Center <- center), new NSAction(fun () -> scrollOut()))
+        UIView.Animate(animationSpeed, 0.0, UIViewAnimationOptions.CurveLinear, new NSAction(fun () -> message.Center <- center), new NSAction(fun () -> scrollOut()))
 
     do
         t.TranslatesAutoresizingMaskIntoConstraints <- false  // important for auto layout!

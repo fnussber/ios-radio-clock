@@ -12,35 +12,40 @@ type NewsStation() =
     let getNews () =
         let url = "http://www.tagesanzeiger.ch/rss.html"
         let req = HttpWebRequest.Create(url) :?> HttpWebRequest
-        let resp = req.GetResponse()
+        let resp = req.GetResponse() // throws 501.. etc -> ERROR HANDLING!!!
         let stream = resp.GetResponseStream()
         let reader = new StreamReader(stream)
         let xml = reader.ReadToEnd()
 
         let doc = new XmlDocument()
-        doc.LoadXml xml
+        doc.LoadXml xml // throws XmlException -> ERROR HANDLING!!
         doc
 
-    let items(xml: XmlDocument) = xml.SelectNodes("/rss/channel/item")
-
-    let nextStories(): list<string> =
-        let xml = getNews()
-        let itms = items(xml)
-        let iter = itms.GetEnumerator()
-        let mutable l: list<string> = List.Empty
-        while iter.MoveNext() do 
-            let item = iter.Current :?> XmlNode
-            let title = item.SelectSingleNode("title").InnerText
-            let desc  = item.SelectSingleNode("description").InnerText
-            //Console.WriteLine(
-            Console.WriteLine("title = " + title)
-            Console.WriteLine("desc  = " + desc)
-            l <- title :: l
+    let items(xml: XmlDocument) = 
+        let nodes = xml.SelectNodes("/rss/channel/item")
+        let iter = nodes.GetEnumerator()
+        let mutable l: list<XmlNode> = List.Empty
+        while iter.MoveNext() do l <- (iter.Current :?> XmlNode) :: l
         l
+
+    let texts xml node =
+        items xml |> List.map (fun i -> i.SelectSingleNode(node).InnerText)
+
+    let nextHeads(): list<string> = 
+        let xml = getNews()
+        texts xml "title"
+
+    let nextStories(): list<string> = 
+        let xml = getNews()
+        texts xml "description"
 
     let labelFor text = new UILabel(Text = text) :> UIView
 
-    member this.Stories(): seq<UIView> =
-        Seq.unfold(fun (stories: list<string>) -> if (stories.IsEmpty) then Some((labelFor("NEW SET")), nextStories()) else Some(labelFor(stories.Head), stories.Tail)) (nextStories())
+    // TODO: Heads and Stories should read from same backing data structure in order to make sure they're always in sync
 
+    member this.Heads(): seq<UIView> =
+        Seq.unfold(fun (stories: list<string>) -> if (stories.IsEmpty) then Some((labelFor("*** *** ***")), nextHeads()) else Some(labelFor(stories.Head), stories.Tail)) (nextHeads())
+
+    member this.Stories(): seq<UIView> =
+        Seq.unfold(fun (stories: list<string>) -> if (stories.IsEmpty) then Some((labelFor("*** *** ***")), nextStories()) else Some(labelFor(stories.Head), stories.Tail)) (nextStories())
     
