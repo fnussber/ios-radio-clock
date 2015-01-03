@@ -9,8 +9,6 @@ open MonoTouch.Foundation
 type RadioClockViewController() = 
     inherit UIViewController()
 
-    member this.Radio = new Radio()
-
     // Release any cached data, images, etc that aren't in use.
     override this.DidReceiveMemoryWarning() = base.DidReceiveMemoryWarning()
 
@@ -23,9 +21,9 @@ type RadioClockViewController() =
 
         let clock = new Clock()
         let toolbar = new Toolbar (clock)
-        let newsTicker1 = new Ticker(news.Heads(), 0.5, 11.0)
-        let newsTicker2 = new Ticker(news.Stories(), 6.0, 0.0)
-        let weatherTicker = new Ticker(weather.Weather(), 0.5, 60.0)
+        let newsTicker1 = new Ticker(news.Heads(), 0.5, 0.5, 9.0)
+        let newsTicker2 = new Ticker(news.Stories(), 1.0, 6.0, 3.0)
+        let weatherTicker = new Ticker(weather.Weather(), 0.5, 0.5, 60.0)
         let placeHolder1 = new UIView(TranslatesAutoresizingMaskIntoConstraints = false) // simpler way for place holder?
         let placeHolder2 = new UIView(TranslatesAutoresizingMaskIntoConstraints = false)
 
@@ -62,6 +60,3 @@ type RadioClockViewController() =
     override this.WillRotate(orientation, duration) = 
         Array.ForEach(this.View.Subviews, fun v -> v.SetNeedsLayout(); v.LayoutIfNeeded()) // TODO: how to enforce relayout??
         //this.View.LayoutIfNeeded()
-
-
-

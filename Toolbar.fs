@@ -3,11 +3,11 @@
 open System
 open System.Drawing
 open MonoTouch.UIKit
+open MonoTouch.Foundation
 
 type Toolbar(clock: Clock) as this = 
     inherit UIToolbar()
 
-    let r = new Radio()
     let btn = new UIBarButtonItem ()
 
     do 
@@ -19,13 +19,19 @@ type Toolbar(clock: Clock) as this =
         this.Items <- [|btn|]
 
     member this.SetAlarm(eventArgs: EventArgs): Unit =
-         Console.WriteLine "Clicked!"
-         if clock.IsStopped() then 
-             clock.StopBlink()
-             clock.Start() 
-         else 
-             clock.Stop()
-             clock.Blink()
+
+        let types = UIUserNotificationType.Alert
+        let settings = UIUserNotificationSettings.GetSettingsForTypes(types, null)
+        UIApplication.SharedApplication.RegisterUserNotificationSettings(settings)
+
+        Console.WriteLine "Clicked!"
+        if clock.IsStopped() then 
+            Alarm.Start(new TimeSpan())
+            clock.StopBlink()
+            clock.Start() 
+        else 
+            clock.Stop()
+            clock.Blink()
 
 
 

@@ -1,58 +1,55 @@
 ﻿namespace RadioClock
 
 open System
+open System.Threading
 open MonoTouch.AVFoundation
 open MonoTouch.Foundation
-
 
 type Station(name: String, url: NSUrl) =
     member this.Name = name
     member this.Url = url
     new (name: String, urlString: String) = Station(name, new NSUrl(urlString))
 
-
-type Radio() = 
-    let mutable stations = [
+module Radio = 
+    let mutable private stations = [
         new Station("DRS1", "http://stream.srg-ssr.ch/drs1/mp3_128.m3u")
         new Station("DRS2", "http://stream.srg-ssr.ch/drs2/mp3_128.m3u")
         new Station("DRS3", "http://stream.srg-ssr.ch/drs3/mp3_128.m3u") ]
-    let mutable player: Option<AVPlayer> = None
-    let mutable station: Option<Station> = None
-    //let mutable stations: List<Station> = new ArrayList<Station>()
+    let mutable private player: Option<AVPlayer> = None
+    let mutable private station: Option<Station> = Some(stations.[0])//None
 
-    member this.Station 
-        with get() = station
-        and set(s) = station <- s
-
-    member this.AddStation s = 
+    let AddStation s = 
         stations <- s :: stations
 
-    member this.RemoveStation sd = 
-        stations <- List.filter (fun s -> not(s.Equals(sd))) stations
+    let RemoveStation sd = 
+        stations <- List.filter (fun s -> s <> sd) stations
 
-    member this.Stations
-        with get(): List<Station> = List.sortBy (fun s -> s.Name) stations
+    let Stations = 
+        stations |> List.sortBy (fun s -> s.Name)
 
-    member this.VolumeUp u =
+    let VolumeUp u =
         player |> Option.map(fun p -> p.Volume = Math.Min(1.0f, p.Volume + u))
 
-    member this.VolumeDown d =
+    let VolumeDown d =
         player |> Option.map(fun p -> p.Volume = Math.Max(0.0f, p.Volume - d))
 
-    member this.Mute() =
+    let Mute() =
         player |> Option.map(fun p -> p.Volume = 0.0f)
 
-    member this.Play() = 
-        player = 
+    let Play() = 
+        // TODO: don't start again if already playing..
+        player <- 
             match station with
                 | Some s ->
                     let p = new AVPlayer(s.Url)
+                    //Thread.Sleep(2000)
+                    //p.Volume <- 1.0f
                     p.Play()
                     Some(p)
                 | None ->
                     None
 
-    member this.Stop() =
+    let Stop() =
         match player with
             | Some p -> 
                 p.Pause()

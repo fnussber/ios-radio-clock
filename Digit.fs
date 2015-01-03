@@ -272,6 +272,9 @@ type Clock() as this =
     member this.Time() =
         new TimeSpan(hh.Value, mm.Value, ss.Value)
 
+    member this.TimeHHMM() =
+        new TimeSpan(hh.Value, mm.Value, 0)
+
     member this.IsStopped() =
         stopped
 
@@ -284,12 +287,18 @@ type Clock() as this =
         stopped <- true
 
     member this.Blink() =
-        hh.Blink() // put all digits in an interable container
+        hh.Blink()
         mm.Blink()
+        ss.Hidden <- true
+        this.SetNeedsLayout()
+        this.LayoutIfNeeded()
 
     member this.StopBlink() =
-        hh.StopBlink() // put all digits in an interable container
+        hh.StopBlink()
         mm.StopBlink()
+        ss.Hidden <- false
+        this.SetNeedsLayout()
+        this.LayoutIfNeeded()
 
     member this.Pulse() =
         let now = System.DateTime.Now

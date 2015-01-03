@@ -7,7 +7,7 @@ open MonoTouch.CoreGraphics
 open MonoTouch.Foundation
 open MonoTouch.UIKit
 
-type Ticker(msgStream: seq<UIView>, animationSpeed: float, showDuration: float) as t = 
+type Ticker(msgStream: seq<UIView>, inSpeed: float, outSpeed: float, showDuration: float) as t = 
     inherit UIView()
 
     let mutable message = new UIView()
@@ -31,7 +31,7 @@ type Ticker(msgStream: seq<UIView>, animationSpeed: float, showDuration: float) 
 
 
     let rec scrollOut() =
-        UIView.Animate(animationSpeed, showDuration, UIViewAnimationOptions.CurveLinear, new NSAction(fun () -> message.Center <- new PointF (message.Center.X - 1000.0f, message.Center.Y)), new NSAction(fun () -> scrollIn()))
+        UIView.Animate(outSpeed, showDuration, UIViewAnimationOptions.CurveLinear, new NSAction(fun () -> message.Center <- new PointF (message.Center.X - 1000.0f, message.Center.Y)), new NSAction(fun () -> scrollIn()))
 
     and scrollIn() =
         nextView()
@@ -39,7 +39,7 @@ type Ticker(msgStream: seq<UIView>, animationSpeed: float, showDuration: float) 
         t.LayoutIfNeeded()
         let center = message.Center
         message.Center <- new PointF (message.Center.X + 1000.0f, message.Center.Y)
-        UIView.Animate(animationSpeed, 0.0, UIViewAnimationOptions.CurveLinear, new NSAction(fun () -> message.Center <- center), new NSAction(fun () -> scrollOut()))
+        UIView.Animate(inSpeed, 0.0, UIViewAnimationOptions.CurveLinear, new NSAction(fun () -> message.Center <- center), new NSAction(fun () -> scrollOut()))
 
     do
         t.TranslatesAutoresizingMaskIntoConstraints <- false  // important for auto layout!

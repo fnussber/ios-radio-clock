@@ -9,6 +9,9 @@ open MonoTouch.UIKit
 
 type NewsStation() = 
 
+    let headFont  = UIFont.FromName("Helvetica-Bold", 30.0f)
+    let storyFont = UIFont.FromName("Helvetica", 20.0f)
+
     let getNews () =
         let url = "http://www.tagesanzeiger.ch/rss.html"
         let req = HttpWebRequest.Create(url) :?> HttpWebRequest
@@ -39,13 +42,14 @@ type NewsStation() =
         let xml = getNews()
         texts xml "description"
 
-    let labelFor text = new UILabel(Text = text) :> UIView
+    let headLabel  text = new UILabel(Text = text, Font = headFont) :> UIView
+    let storyLabel text = new UILabel(Text = text, Font = storyFont) :> UIView
 
     // TODO: Heads and Stories should read from same backing data structure in order to make sure they're always in sync
 
     member this.Heads(): seq<UIView> =
-        Seq.unfold(fun (stories: list<string>) -> if (stories.IsEmpty) then Some((labelFor("*** *** ***")), nextHeads()) else Some(labelFor(stories.Head), stories.Tail)) (nextHeads())
+        Seq.unfold(fun (stories: list<string>) -> if (stories.IsEmpty) then Some((headLabel("*** *** ***")), nextHeads()) else Some(headLabel(stories.Head), stories.Tail)) (nextHeads())
 
     member this.Stories(): seq<UIView> =
-        Seq.unfold(fun (stories: list<string>) -> if (stories.IsEmpty) then Some((labelFor("*** *** ***")), nextStories()) else Some(labelFor(stories.Head), stories.Tail)) (nextStories())
+        Seq.unfold(fun (stories: list<string>) -> if (stories.IsEmpty) then Some((storyLabel("*** *** ***")), nextStories()) else Some(storyLabel(stories.Head), stories.Tail)) (nextStories())
     
