@@ -1,22 +1,20 @@
-﻿<Properties>
-  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug|iPhoneSimulator" PreferredExecutionTarget="MonoDevelop.IPhone.IPhoneSimulatorTarget.IPadRetina.8.1" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="AlarmController.fs">
+﻿<Properties GitUserInfo="UsingGIT">
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug|iPhone" PreferredExecutionTarget="MonoDevelop.IPhone.IPhoneDeviceTarget.Flo's iPad" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="Radio.fs">
     <Files>
-      <File FileName="AppDelegate.fs" Line="66" Column="66" />
+      <File FileName="AppDelegate.fs" Line="1" Column="1" />
       <File FileName="RadioClockViewController.fs" Line="1" Column="1" />
       <File FileName="Radio.fs" Line="1" Column="1" />
       <File FileName="Toolbar.fs" Line="1" Column="1" />
       <File FileName="Digit.fs" Line="1" Column="1" />
-      <File FileName="Ticker.fs" Line="31" Column="31" />
-      <File FileName="NewsStation.fs" Line="47" Column="47" />
-      <File FileName="WeatherStation.fs" Line="1" Column="1" />
-      <File FileName="AlarmController.fs" Line="1" Column="1" />
+      <File FileName="Ticker.fs" Line="1" Column="1" />
+      <File FileName="NewsStation.fs" Line="1" Column="1" />
+      <File FileName="WeatherStation.fs" Line="26" Column="26" />
+      <File FileName="Alarm.fs" Line="1" Column="1" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
-    <BreakpointStore>
-      <Breakpoint file="/Users/fnussber/Documents/Projects/ios-radio-clock/AppDelegate.fs" line="23" column="58" />
-    </BreakpointStore>
+    <BreakpointStore />
   </MonoDevelop.Ide.DebuggingService.Breakpoints>
   <MonoDevelop.Ide.DebuggingService.PinnedWatches />
 </Properties>

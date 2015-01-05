@@ -8,23 +8,32 @@ open MonoTouch.Foundation
 type Toolbar(clock: Clock) as this = 
     inherit UIToolbar()
 
-    let btn = new UIBarButtonItem ()
+    let addButton(image: string, handler) =
+        let btn = new UIBarButtonItem ()
+        btn.Image <- new UIImage(image)
+        btn.Style <- UIBarButtonItemStyle.Plain
+        btn.Clicked.Add(handler)
+        btn
 
     do 
-        btn.Image <- new UIImage("timer-32.png")
-        btn.Style <- UIBarButtonItemStyle.Plain
-        btn.Clicked.Add(this.SetAlarm)
+        let btn0 = addButton("timer-32.png", this.SetTimer)
+        let btn1 = addButton("alarm_clock-32.png", this.SetAlarm)
+        let btn2 = addButton("radio-32.png", this.ToggleRadio)
+
+        //btn.Image <- new UIImage("timer-32.png")
+        //btn.Style <- UIBarButtonItemStyle.Plain
+        //btn.Clicked.Add(this.SetAlarm)
 
         this.TranslatesAutoresizingMaskIntoConstraints <- false  // important for auto layout!
-        this.Items <- [|btn|]
+        this.Items <- [|btn0; btn1; btn2|]
+
+    member this.SetTimer(eventArgs: EventArgs): Unit =
+        Console.WriteLine("set timer")
 
     member this.SetAlarm(eventArgs: EventArgs): Unit =
-
         let types = UIUserNotificationType.Alert
         let settings = UIUserNotificationSettings.GetSettingsForTypes(types, null)
         UIApplication.SharedApplication.RegisterUserNotificationSettings(settings)
-
-        Console.WriteLine "Clicked!"
         if clock.IsStopped() then 
             Alarm.Start(new TimeSpan())
             clock.StopBlink()
@@ -32,6 +41,9 @@ type Toolbar(clock: Clock) as this =
         else 
             clock.Stop()
             clock.Blink()
+
+    member this.ToggleRadio(eventArgs: EventArgs): Unit =
+        if Radio.IsPlaying() then Radio.Check() else Radio.Play()
 
 
 
