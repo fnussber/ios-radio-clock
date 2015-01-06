@@ -10,7 +10,24 @@ type Station(name: String, url: NSUrl) =
     member this.Url = url
     new (name: String, urlString: String) = Station(name, new NSUrl(urlString))
 
+type Observer() =
+    inherit NSObject()
+    let metadataEvent = new Event<string>()
+    override this.ObserveValue(key: NSString, obj: NSObject, change: NSDictionary, context: IntPtr) = 
+        Console.WriteLine("+++ item metadata changed +++")
+        match obj with
+        | :? AVPlayerItem as i ->
+            if i.TimedMetadata <> null then
+                let s = i.TimedMetadata.[0].ValueForKey(new NSString("value")).ToString()
+                metadataEvent.Trigger(s)
+        | _ -> ()
+
+    member o.AddMetadataEvent(f: string -> Unit) =
+        Event.add f metadataEvent.Publish
+
 module Radio = 
+
+    let observer = new Observer() // simpler way to do this using delegates?
 
     let mutable private stations = [
         new Station("DRS1", "http://stream.srg-ssr.ch/drs1/mp3_128.m3u")
@@ -19,13 +36,6 @@ module Radio =
 
     let mutable player: Option<AVPlayer> = None
     let mutable private station: Option<Station> = Some(stations.[0])//None
-
-    let observeChange(u: NSObservedChange) =
-        Console.WriteLine("+++ item metadata changed +++")
-        player 
-            |> Option.map(fun p  -> p.CurrentItem.TimedMetadata) 
-            |> Option.map(fun is -> Array.ForEach(is, fun i -> Console.WriteLine(i.ToString))) 
-            |> ignore
 
     let AddStation s = 
         stations <- s :: stations
@@ -47,9 +57,11 @@ module Radio =
 
     let IsPlaying() = player <> None
 
+    let AddMetadataEvent(f: string -> Unit) = observer.AddMetadataEvent(f)
+
     let Play() = 
         let item = new AVPlayerItem(new NSUrl("http://stream.srg-ssr.ch/drs3/mp3_128.m3u"))
-        item.AddObserver("timedMetadata", NSKeyValueObservingOptions.Prior + NSKeyValueObservingOptions.Initial, observeChange) |> ignore// observer: Action<NSObservedChange>
+        item.AddObserver(observer, "timedMetadata", NSKeyValueObservingOptions.New + NSKeyValueObservingOptions.Initial, IntPtr(0))
         let avplayer = new AVPlayer(item)
         avplayer.Play()
         player <- Some(avplayer)
@@ -68,13 +80,11 @@ module Radio =
 //                | None ->
 //                    None
 
-    let Check() =
-        Console.WriteLine("do this")
-
     let Stop() =
         match player with
             | Some p -> 
                 p.Pause()
+                p.CurrentItem.RemoveObserver(observer, "timedMetadata")
                 p.Dispose()
                 player <- None
             | None -> 

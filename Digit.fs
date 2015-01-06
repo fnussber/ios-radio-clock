@@ -161,7 +161,6 @@ type Digit2(up: NSAction, down: NSAction) as this =
         label1.Blink()
 
     member this.Next(next: int) =
-        printfn "next"
         label0.InvokeOnMainThread(new NSAction(fun _ ->
                 label0.AnimateOut()
                 label1.AnimateIn()
@@ -309,6 +308,10 @@ type Clock() as this =
     member this.Is24Hours() =
         let format = NSDateFormatter.GetDateFormatFromTemplate("j", uint32(0), NSLocale.CurrentLocale)
         format.IndexOf('a') = -1
+
+    // TODO: other cleanup needed?
+    interface IDisposable with
+        member x.Dispose() = timer.Dispose()
 
 
          

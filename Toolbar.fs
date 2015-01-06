@@ -43,7 +43,7 @@ type Toolbar(clock: Clock) as this =
             clock.Blink()
 
     member this.ToggleRadio(eventArgs: EventArgs): Unit =
-        if Radio.IsPlaying() then Radio.Check() else Radio.Play()
+        if Radio.IsPlaying() then Radio.Stop() else Radio.Play()
 
 
 
