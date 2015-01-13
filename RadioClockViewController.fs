@@ -17,17 +17,13 @@ type RadioClockViewController() =
         base.ViewDidLoad()
 
         let weather = new WeatherStation()
-        let news = new NewsStation()
 
         let clock = new Clock()
         let toolbar = new Toolbar (clock)
         let metaTicker = new Ticker(Radio.NextMetadata, 0.5, 0.5)
-        let newsTicker1 = new Ticker(news.NextHeadline, 0.5, 0.5)
-        let newsTicker2 = new Ticker(news.NextDescription, 1.0, 6.0)
+        let newsTicker1 = new Ticker(NewsStation.NextHeadline, 0.5, 0.5)
+        let newsTicker2 = new Ticker(NewsStation.NextDescription, 1.0, 6.0)
         //let weatherTicker = new Ticker(0.5, 0.5)
-        Event.add (fun s -> Console.WriteLine("next metadata"); metaTicker.NextMessage(s)) Radio.NextMetadata.Publish
-        Event.add (fun s -> Console.WriteLine("next headline"); newsTicker1.NextMessage(s)) news.NextHeadline.Publish
-        Event.add (fun s -> Console.WriteLine("next description"); newsTicker2.NextMessage(s)) news.NextDescription.Publish
         let placeHolder1 = new UIView(TranslatesAutoresizingMaskIntoConstraints = false) // simpler way for place holder?
         let placeHolder2 = new UIView(TranslatesAutoresizingMaskIntoConstraints = false)
 

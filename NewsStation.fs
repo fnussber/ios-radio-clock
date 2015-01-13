@@ -9,11 +9,11 @@ open MonoTouch.UIKit
 
 type NewsItem = {head: string; desc: string;}
 
-type NewsStation() = 
+module NewsStation = 
 
     let timer = new System.Timers.Timer(10000.0)
-    let nextHeadline    = new Event<string>()
-    let nextDescription = new Event<string>()
+    let NextHeadline    = new Event<string>()
+    let NextDescription = new Event<string>()
     let mutable nitems  = list<NewsItem>.Empty
 
     let headFont  = UIFont.FromName("Helvetica-Bold", 30.0f)
@@ -62,15 +62,15 @@ type NewsStation() =
                 n
             else 
                 {head="NONE";desc="NONE";}) // TODO: is there a headOption in F#?
-        nextHeadline.Trigger(next.head)
-        nextDescription.Trigger(next.desc)
+        NextHeadline.Trigger(next.head)
+        NextDescription.Trigger(next.desc)
 
     do
         timer.Elapsed.Add(fun _ -> nextItem())
         timer.Start()
 
-    member t.NextHeadline = nextHeadline
-    member t.NextDescription = nextDescription
+//    member t.NextHeadline = nextHeadline
+//    member t.NextDescription = nextDescription
 
     // TODO: other cleanup needed? Is this needed at all??
 //    interface IDisposable with

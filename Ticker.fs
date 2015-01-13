@@ -20,12 +20,7 @@ type Ticker(event: Event<string>, inSpeed: float, outSpeed: float) as t =
         message.Center <- new PointF (message.Center.X + 1000.0f, message.Center.Y)
         UIView.Animate(inSpeed, 0.0, UIViewAnimationOptions.CurveLinear, new NSAction(fun () -> message.Center <- center), null)
 
-    do
-        t.TranslatesAutoresizingMaskIntoConstraints <- false  // important for auto layout!
-        t.BackgroundColor <- UIColor.White
- 
-
-    member t.NextMessage(msg) =
+    let nextMessage(msg) =
         t.InvokeOnMainThread(new NSAction(fun _ ->
             scrollOut()
             // replace current message with new one, relayout everything
@@ -39,3 +34,8 @@ type Ticker(event: Event<string>, inSpeed: float, outSpeed: float) as t =
             t.AddConstraints(v)
             scrollIn()
         ))   
+    do
+        t.TranslatesAutoresizingMaskIntoConstraints <- false  // important for auto layout!
+        t.BackgroundColor <- UIColor.White
+        Event.add (fun s -> Console.WriteLine("next"); nextMessage(s)) event.Publish
+ 
