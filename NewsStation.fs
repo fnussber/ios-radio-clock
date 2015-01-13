@@ -7,7 +7,14 @@ open System.Text
 open System.Xml
 open MonoTouch.UIKit
 
+type NewsItem = {head: string; desc: string;}
+
 type NewsStation() = 
+
+    let timer = new System.Timers.Timer(10000.0)
+    let nextHeadline    = new Event<string>()
+    let nextDescription = new Event<string>()
+    let mutable nitems  = list<NewsItem>.Empty
 
     let headFont  = UIFont.FromName("Helvetica-Bold", 30.0f)
     let storyFont = UIFont.FromName("Helvetica", 20.0f)
@@ -24,32 +31,48 @@ type NewsStation() =
         doc.LoadXml xml // throws XmlException -> ERROR HANDLING!!
         doc
 
-    let items(xml: XmlDocument) = 
-        let nodes = xml.SelectNodes("/rss/channel/item")
+    let xmlItems(doc: XmlDocument): list<XmlNode> = 
+        let nodes = doc.SelectNodes("/rss/channel/item")
         let iter = nodes.GetEnumerator()
         let mutable l: list<XmlNode> = List.Empty
         while iter.MoveNext() do l <- (iter.Current :?> XmlNode) :: l
         l
 
-    let texts xml node =
-        items xml |> List.map (fun i -> i.SelectSingleNode(node).InnerText)
+    let item(xml: XmlNode): NewsItem = 
+        let v1 = xml.SelectSingleNode("title").InnerText
+        let v2 = xml.SelectSingleNode("description").InnerText
+        let ni = { head = v1; desc = v2; }
+        ni
 
-    let nextHeads(): list<string> = 
-        let xml = getNews()
-        texts xml "title"
+    let items xml: list<NewsItem> =
+        xmlItems xml |> List.map (fun i -> item i)
 
-    let nextStories(): list<string> = 
-        let xml = getNews()
-        texts xml "description"
+    let loadNewsItems(): Unit = 
+        // execute load in background and add news items once they are available
+        let newestItems = items(getNews()) // TODO: DO IN BACKGROUND!
+        lock nitems (fun _ -> nitems <- nitems |> List.append(newestItems))
 
-    let headLabel  text = new UILabel(Text = text, Font = headFont) :> UIView
-    let storyLabel text = new UILabel(Text = text, Font = storyFont) :> UIView
+    let nextItem(): Unit =
+        // produce the next item, if available, empty item if currently no items are available
+        if nitems.Length <= 2 then loadNewsItems()
+        let next = lock nitems (fun _ -> 
+            if nitems.Length > 0 then 
+                let n = nitems.Head
+                nitems <- nitems.Tail 
+                n
+            else 
+                {head="NONE";desc="NONE";}) // TODO: is there a headOption in F#?
+        nextHeadline.Trigger(next.head)
+        nextDescription.Trigger(next.desc)
 
-    // TODO: Heads and Stories should read from same backing data structure in order to make sure they're always in sync
+    do
+        timer.Elapsed.Add(fun _ -> nextItem())
+        timer.Start()
 
-    member this.Heads(): seq<UIView> =
-        Seq.unfold(fun (stories: list<string>) -> if (stories.IsEmpty) then Some((headLabel("*** *** ***")), nextHeads()) else Some(headLabel(stories.Head), stories.Tail)) (nextHeads())
+    member t.NextHeadline = nextHeadline
+    member t.NextDescription = nextDescription
 
-    member this.Stories(): seq<UIView> =
-        Seq.unfold(fun (stories: list<string>) -> if (stories.IsEmpty) then Some((storyLabel("*** *** ***")), nextStories()) else Some(storyLabel(stories.Head), stories.Tail)) (nextStories())
-    
+    // TODO: other cleanup needed? Is this needed at all??
+//    interface IDisposable with
+//        member x.Dispose() = timer.Dispose()
+

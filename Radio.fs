@@ -4,30 +4,29 @@ open System
 open System.Threading
 open MonoTouch.AVFoundation
 open MonoTouch.Foundation
+open MonoTouch.UIKit
 
 type Station(name: String, url: NSUrl) =
     member this.Name = name
     member this.Url = url
     new (name: String, urlString: String) = Station(name, new NSUrl(urlString))
 
-type Observer() =
+type Observer(event: Event<string>) =
     inherit NSObject()
-    let metadataEvent = new Event<string>()
     override this.ObserveValue(key: NSString, obj: NSObject, change: NSDictionary, context: IntPtr) = 
         Console.WriteLine("+++ item metadata changed +++")
         match obj with
         | :? AVPlayerItem as i ->
             if i.TimedMetadata <> null then
                 let s = i.TimedMetadata.[0].ValueForKey(new NSString("value")).ToString()
-                metadataEvent.Trigger(s)
+                event.Trigger(s)
         | _ -> ()
-
-    member o.AddMetadataEvent(f: string -> Unit) =
-        Event.add f metadataEvent.Publish
 
 module Radio = 
 
-    let observer = new Observer() // simpler way to do this using delegates?
+    let NextMetadata = new Event<string>()
+
+    let private observer = new Observer(NextMetadata) // simpler way to do this using delegates?
 
     let mutable private stations = [
         new Station("DRS1", "http://stream.srg-ssr.ch/drs1/mp3_128.m3u")
@@ -56,8 +55,6 @@ module Radio =
         player |> Option.map(fun p -> p.Volume = 0.0f)
 
     let IsPlaying() = player <> None
-
-    let AddMetadataEvent(f: string -> Unit) = observer.AddMetadataEvent(f)
 
     let Play() = 
         let item = new AVPlayerItem(new NSUrl("http://stream.srg-ssr.ch/drs3/mp3_128.m3u"))

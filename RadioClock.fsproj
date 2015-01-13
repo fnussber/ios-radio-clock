@@ -27,6 +27,7 @@
     <MtouchI18n>
     </MtouchI18n>
     <MtouchArch>i386</MtouchArch>
+    <CodesignKey>iPhone Developer</CodesignKey>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|iPhoneSimulator' ">
     <DebugSymbols>false</DebugSymbols>
@@ -40,6 +41,9 @@
     <CodesignEntitlements>Entitlements.plist</CodesignEntitlements>
     <ConsolePause>false</ConsolePause>
     <Tailcalls>true</Tailcalls>
+    <MtouchI18n>
+    </MtouchI18n>
+    <MtouchArch>i386</MtouchArch>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|iPhone' ">
     <DebugSymbols>true</DebugSymbols>
@@ -60,6 +64,7 @@
     <IpaPackageName>
     </IpaPackageName>
     <MtouchDebug>true</MtouchDebug>
+    <MtouchLink>None</MtouchLink>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|iPhone' ">
     <DebugSymbols>false</DebugSymbols>
@@ -91,6 +96,9 @@
     <CodesignProvision>Automatic:AdHoc</CodesignProvision>
     <ConsolePause>false</ConsolePause>
     <Tailcalls>true</Tailcalls>
+    <MtouchI18n>
+    </MtouchI18n>
+    <MtouchArch>ARMv7</MtouchArch>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'AppStore|iPhone' ">
     <DebugSymbols>false</DebugSymbols>
@@ -105,6 +113,9 @@
     <CodesignProvision>Automatic:AppStore</CodesignProvision>
     <ConsolePause>false</ConsolePause>
     <Tailcalls>true</Tailcalls>
+    <MtouchI18n>
+    </MtouchI18n>
+    <MtouchArch>ARMv7</MtouchArch>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -122,8 +133,8 @@
   <ItemGroup>
     <None Include="Info.plist" />
     <None Include="Entitlements.plist" />
-    <Compile Include="Ticker.fs" />
     <Compile Include="Radio.fs" />
+    <Compile Include="Ticker.fs" />
     <Compile Include="Alarm.fs" />
   </ItemGroup>
   <ItemGroup>
