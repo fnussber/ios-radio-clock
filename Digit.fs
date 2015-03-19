@@ -19,7 +19,7 @@ type Digit(digit: String) as self =
         self.Font <- font
         self.Text <- digit
         self.TextAlignment <- UITextAlignment.Center
-        self.BackgroundColor <- new UIColor(float32(random.NextDouble()), 0.0f, 0.0f, 0.5f)
+        self.BackgroundColor <- UIColor.Clear// new UIColor(float32(random.NextDouble()), 0.0f, 0.0f, 0.5f)
         self.TextColor <- UIColor.White
 
     member this.Blink() =
@@ -250,13 +250,14 @@ type Clock() as this =
     let ss = new TwoDigits(60)
 
     do
+        this.BackgroundColor <- UIColor.Black
         this.TranslatesAutoresizingMaskIntoConstraints <- false  // important for auto layout!
         this.AddSubview(hh) // use list..
         this.AddSubview(mm)
         this.AddSubview(ss)
         let metrics = new NSDictionary()
         let views = new NSDictionary("hh", hh, "mm", mm, "ss", ss)
-        let ch = NSLayoutConstraint.FromVisualFormat("H:|[hh][mm(==hh)][ss(==mm)]|", NSLayoutFormatOptions.DirectionLeadingToTrailing, metrics, views) 
+        let ch = NSLayoutConstraint.FromVisualFormat("H:|[hh]-25-[mm(==hh)]-25-[ss(==mm)]|", NSLayoutFormatOptions.DirectionLeadingToTrailing, metrics, views) 
         let cv1 = NSLayoutConstraint.FromVisualFormat("V:|[hh]|", NSLayoutFormatOptions.DirectionLeadingToTrailing, metrics, views) 
         let cv2 = NSLayoutConstraint.FromVisualFormat("V:|[mm]|", NSLayoutFormatOptions.DirectionLeadingToTrailing, metrics, views) 
         let cv3 = NSLayoutConstraint.FromVisualFormat("V:|[ss]|", NSLayoutFormatOptions.DirectionLeadingToTrailing, metrics, views) 
