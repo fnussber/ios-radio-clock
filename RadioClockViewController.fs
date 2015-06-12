@@ -26,9 +26,9 @@ type RadioClockViewController() =
         //let weatherTicker = new Ticker(0.5, 0.5)
         let placeHolder1 = new UILabel(TranslatesAutoresizingMaskIntoConstraints = false) // simpler way for place holder?
         let placeHolder2 = new UILabel(TranslatesAutoresizingMaskIntoConstraints = false)
-        let background = new UIView(TranslatesAutoresizingMaskIntoConstraints = false, BackgroundColor = UIColor.Black)
+        let background = new UIImageView(TranslatesAutoresizingMaskIntoConstraints = false, BackgroundColor = UIColor.Black)
+        let astroPics = new AstroPics(background)
 
-//        this.View.BackgroundColor <- UIColor.Clear
         this.View.AddSubview (background)
         this.View.AddSubview (clock)
         this.View.AddSubview (metaTicker)

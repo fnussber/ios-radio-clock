@@ -250,7 +250,7 @@ type Clock() as this =
     let ss = new TwoDigits(60)
 
     do
-        this.BackgroundColor <- UIColor.Black
+        this.BackgroundColor <- UIColor.Clear
         this.TranslatesAutoresizingMaskIntoConstraints <- false  // important for auto layout!
         this.AddSubview(hh) // use list..
         this.AddSubview(mm)

@@ -34,7 +34,7 @@ type Ticker(event: Event<string>, inSpeed: float, outSpeed: float) as this =
             let label = new UILabel(TranslatesAutoresizingMaskIntoConstraints = false, Text = msg)
             label.Font <- this.font
             label.TextColor <- UIColor.White
-            label.BackgroundColor <- UIColor.Black
+            label.BackgroundColor <- UIColor.Clear
             // replace current message with new one, relayout everything
             message.RemoveFromSuperview()
             message <- label
