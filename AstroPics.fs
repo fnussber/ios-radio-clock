@@ -2,6 +2,7 @@
 
 open System
 open System.Net
+open System.Text.RegularExpressions
 open MonoTouch.UIKit
 open MonoTouch.Foundation
 
@@ -12,6 +13,7 @@ type AstroPics(view: UIImageView) =
     let webClient   = new WebClient()    
     let timer       = new System.Timers.Timer(10000.0)
     let mutable nxtImage: UIImage = null
+    let mutable images: list<string> = List.empty
     let mutable img = 0
 
     let updatePicture(): Unit =
@@ -20,21 +22,41 @@ type AstroPics(view: UIImageView) =
             UIView.Transition(view, 3.0, UIViewAnimationOptions.TransitionCrossDissolve, new NSAction(fun _ -> view.Image <- nxtImage), null)
         ))
 
+    let loadPicItems(): Unit = 
+        // execute load in background and add news items once they are available
+        let newestItems = RssFeed.items("http://www.acme.com/jef/apod/rss.xml") 
+        ()
+        //lock nitems (fun _ -> nitems <- nitems |> List.append(newestItems))
+
+
+
+    let imageSource(input: String): Option<String> =
+        let m = Regex.Match(input, "img src=\"([^\"]*)") 
+        if (m.Success) then Some(m.Groups.Item(1).Value) else None // group 0 is the whole matched expression, first group is 1
+
+    let imageSources(items: seq<NewsItem>): list<string> =   // is there a flatten in F#?
+        Seq.map (fun i -> imageSource(i.desc)) items
+        |> Seq.filter (fun i -> i.IsSome)
+        |> Seq.map (fun i -> i.Value)
+        |> Seq.toList
+
     let nextPicture(): Unit =
+        img <- img + 1  // TODO: need error handling in case Download fails, to be sure inc first
         updatePicture()
-        let images = ["http://apod.nasa.gov/apod/image/1506/sh155walter_z66.jpg"; "http://apod.nasa.gov/apod/image/1506/PoseidonMW_Maragos_960.jpg"; "http://apod.nasa.gov/apod/image/1506/FlashMoon_OT_from_ORM_140km-DLopez_840mm600.jpg"]
-        webClient.DownloadDataAsync(new Uri(List.nth images (img % images.Length)))
-        img <- img + 1
+        webClient.DownloadDataAsync(new Uri(List.nth images (img % images.Length)))  // TODO fails if images.Length is 0
 
     let pictureLoaded(bytes: byte[]): Unit =
         if (bytes.Length > 0) then
             nxtImage <- new UIImage(NSData.FromArray(bytes))
 
-
     do
+        // get pictures // TODO: update pics
+        let items = RssFeed.items("http://www.acme.com/jef/apod/rss.xml")
+        images <- imageSources(items)
+
         // install callback
         webClient.DownloadDataCompleted.Add(fun s -> pictureLoaded(s.Result))
 
-        // start timer
+        // show a first picture and start timer
         timer.Elapsed.Add(fun _ -> nextPicture())
         timer.Start()
