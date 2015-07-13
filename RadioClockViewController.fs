@@ -34,12 +34,10 @@ type RadioClockViewController() as this =
     override this.ViewDidLoad() = 
         base.ViewDidLoad()  
 
-        let weather = new WeatherStation()
-
-        let metaTicker = new MetaTicker(Radio.NextMetadata)
-        let newsTicker1 = new HeadlineTicker(NewsStation.NextHeadline)
-        let newsTicker2 = new DescriptionTicker(NewsStation.NextDescription)
-        //let weatherTicker = new Ticker(0.5, 0.5)
+        let metaTicker = new Ticker(Radio.NextMetadata, 0.5, 0.5)
+        let newsTicker1 = new Ticker(NewsStation.NextHeadline, 0.5, 0.5)
+        let newsTicker2 = new Ticker(NewsStation.NextDescription, 1.0, 6.0)
+        let weatherTicker = new Ticker(WeatherStation.NextWeather, 0.5, 0.5)
         let placeHolder1 = new UILabel(TranslatesAutoresizingMaskIntoConstraints = false) // simpler way for place holder?
         let placeHolder2 = new UILabel(TranslatesAutoresizingMaskIntoConstraints = false)
         let background = new UIImageView(TranslatesAutoresizingMaskIntoConstraints = false, BackgroundColor = UIColor.Black)
@@ -50,7 +48,7 @@ type RadioClockViewController() as this =
         this.View.AddSubview (background)
         this.View.AddSubview (clock)
         this.View.AddSubview (metaTicker)
-//        this.View.AddSubview (weatherTicker)
+        this.View.AddSubview (weatherTicker)
         this.View.AddSubview (newsTicker1)
         this.View.AddSubview (newsTicker2)
         this.View.AddSubview (placeHolder1)
@@ -58,14 +56,15 @@ type RadioClockViewController() as this =
   
 
         let metrics = new NSDictionary()
-        let views = new NSDictionary("metaTicker", metaTicker, "newsTicker1", newsTicker1, "newsTicker2", newsTicker2, "clock", clock, "place1", placeHolder1, "place2", placeHolder2, "back", background)
+        let views = new NSDictionary("weatherTicker", weatherTicker, "metaTicker", metaTicker, "newsTicker1", newsTicker1, "newsTicker2", newsTicker2, "clock", clock, "place1", placeHolder1, "place2", placeHolder2, "back", background)
         let cha = NSLayoutConstraint.FromVisualFormat("H:|[back]|", NSLayoutFormatOptions.DirectionLeadingToTrailing, metrics, views) 
         let chb = NSLayoutConstraint.FromVisualFormat("V:|[back]|", NSLayoutFormatOptions.DirectionLeadingToTrailing, metrics, views) 
         let ch0 = NSLayoutConstraint.FromVisualFormat("H:|-150-[clock]-150-|", NSLayoutFormatOptions.DirectionLeadingToTrailing, metrics, views) 
+        let ch2 = NSLayoutConstraint.FromVisualFormat("H:|[weatherTicker]|", NSLayoutFormatOptions.DirectionLeadingToTrailing, metrics, views) 
         let ch1 = NSLayoutConstraint.FromVisualFormat("H:|[metaTicker]|", NSLayoutFormatOptions.DirectionLeadingToTrailing, metrics, views) 
         let ch2 = NSLayoutConstraint.FromVisualFormat("H:|[newsTicker1]|", NSLayoutFormatOptions.DirectionLeadingToTrailing, metrics, views) 
         let ch3 = NSLayoutConstraint.FromVisualFormat("H:|[newsTicker2]|", NSLayoutFormatOptions.DirectionLeadingToTrailing, metrics, views) 
-        let cv = NSLayoutConstraint.FromVisualFormat("V:|[place1][clock(200)][place2(==place1)][metaTicker(50)][newsTicker1(50)][newsTicker2(50)]-20-|", NSLayoutFormatOptions.DirectionLeadingToTrailing, metrics, views) 
+        let cv = NSLayoutConstraint.FromVisualFormat("V:|[place1][weatherTicker(50)][clock(200)][place2(==place1)][metaTicker(50)][newsTicker1(50)][newsTicker2(50)]-20-|", NSLayoutFormatOptions.DirectionLeadingToTrailing, metrics, views) 
         this.View.AddConstraints(cha)
         this.View.AddConstraints(chb)
         this.View.AddConstraints(ch0)

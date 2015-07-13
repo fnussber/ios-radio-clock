@@ -18,9 +18,9 @@ type AstroPics(view: UIImageView) =
 
     let updatePicture(): Unit =
         // todo: nxtImage could be null here..
-        view.InvokeOnMainThread(new NSAction(fun _ ->
-            UIView.Transition(view, 3.0, UIViewAnimationOptions.TransitionCrossDissolve, new NSAction(fun _ -> view.Image <- nxtImage), null)
-        ))
+        view.InvokeOnMainThread(fun _ ->
+            UIView.Transition(view, 3.0, UIViewAnimationOptions.TransitionCrossDissolve, (fun _ -> view.Image <- nxtImage), null)
+        )
 
     let loadPicItems(): Unit = 
         // execute load in background and add news items once they are available

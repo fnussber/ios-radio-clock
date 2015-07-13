@@ -66,7 +66,7 @@ type Digit(digit: String) as self =
 
         // --- fade in
         self.Alpha <- 0.0f
-        UIView.Animate(0.9, 0.0, UIViewAnimationOptions.CurveEaseIn, new NSAction(fun () -> self.Alpha <- 1.0f), null)
+        UIView.Animate(0.9, 0.0, UIViewAnimationOptions.CurveEaseIn, (fun () -> self.Alpha <- 1.0f), null)
 
   
     member this.AnimateOut() =
@@ -108,11 +108,11 @@ type Digit(digit: String) as self =
 
         // --- fade out
         self.Alpha <- 1.0f
-        UIView.Animate(0.9, 0.0, UIViewAnimationOptions.CurveEaseOut, new NSAction(fun () -> self.Alpha <- 0.0f), null)
+        UIView.Animate(0.9, 0.0, UIViewAnimationOptions.CurveEaseOut, (fun () -> self.Alpha <- 0.0f), null)
 
 
 //[<AbstractClass>]
-type Digit2(up: NSAction, down: NSAction) as this =
+type Digit2 (up: NSAction, down: NSAction) as this =
     inherit UIView()
 
     let mutable d = 0
@@ -161,7 +161,7 @@ type Digit2(up: NSAction, down: NSAction) as this =
         label1.Blink()
 
     member this.Next(next: int) =
-        label0.InvokeOnMainThread(new NSAction(fun _ ->
+        label0.InvokeOnMainThread((fun _ ->
                 label0.AnimateOut()
                 label1.AnimateIn()
                 label0.Text <- d.ToString()
@@ -230,7 +230,7 @@ type TwoDigits(maxValue: int) as this =
         if d1.Digit <> d/10 then d1.Next(d/10)
         if d0.Digit <> d%10 then d0.Next(d%10)
 
-    member this.Up(x: int)   = 
+    member this.Up(x: int)   =
         if this.Value + x < maxValue then this.Next(this.Value + x) else this.Next(0)
 
     member this.Down(x: int) = 

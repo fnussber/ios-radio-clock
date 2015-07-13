@@ -15,7 +15,9 @@ open MonoTouch.UIKit
 // Credits for weather icons: http://icons8.com/web-app/category/ios7/Weather
 
 /// Simple weather station that uses our current location to get weather information from openeweathermap.org
-type WeatherStation() =
+module WeatherStation =
+
+    let NextWeather    = new Event<UIView>()
 
     let locationManager = new CLLocationManager()
 
@@ -87,10 +89,11 @@ type WeatherStation() =
 
     let weatherView() =
         let xml = getWeather()
-        printWeather xml
+//        printWeather xml
         let v = new UIView(TranslatesAutoresizingMaskIntoConstraints = false)
         let icon = new UIImageView(icon(xml)) 
-        let label = new UILabel(Text = weather(xml), TranslatesAutoresizingMaskIntoConstraints = false)
+        icon.BackgroundColor <- new UIColor(1.0f, 1.0f, 1.0f, 0.5f)
+        let label = new UILabel(Text = weather(xml), TranslatesAutoresizingMaskIntoConstraints = false, TextColor = UIColor.White)
         icon.TranslatesAutoresizingMaskIntoConstraints <- false
         v.AddSubview(icon)
         v.AddSubview(label)
@@ -106,6 +109,9 @@ type WeatherStation() =
         v.AddConstraints(cv1)
         v
 
+//    let weather(): seq<UIView> =
+//        Seq.unfold(fun weather -> Some(weather, weatherView())) (weatherView()) // produce a weather view over and over again, this will in fact reload everytime latest weather info
+
     do
         // need to ask for iOS 8
         //if (UIDevice.CurrentDevice.CheckSystemVersion(8, 0)) then locationManager.RequestWhenInUseAuthorization()
@@ -115,7 +121,8 @@ type WeatherStation() =
         locationManager.RequestWhenInUseAuthorization()
 //        locationManager.UpdatedLocation |> Event.add(fun evArgs -> Console.WriteLine("NEW POSITION"))
         locationManager.StartUpdatingLocation()
-         
 
-    member this.Weather(): seq<UIView> =
-        Seq.unfold(fun weather -> Some(weather, weatherView())) (weatherView()) // produce a weather view over and over again, this will in fact reload everytime latest weather info
+        let timer = new System.Timers.Timer(10000.0)
+        timer.Elapsed.Add(fun _ -> locationManager.InvokeOnMainThread(fun _ -> NextWeather.Trigger(weatherView())))
+        timer.Start()
+         

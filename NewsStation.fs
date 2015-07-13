@@ -8,12 +8,15 @@ open MonoTouch.UIKit
 module NewsStation = 
 
     let timer = new System.Timers.Timer(10000.0)
-    let NextHeadline    = new Event<string>()
-    let NextDescription = new Event<string>()
+    let NextHeadline    = new Event<UIView>()
+    let NextDescription = new Event<UIView>()
     let mutable nitems  = list<NewsItem>.Empty
 
-    let headFont  = UIFont.FromName("Helvetica-Bold", 30.0f)
-    let storyFont = UIFont.FromName("Helvetica", 20.0f)
+    let headFont = UIFont.FromName("Helvetica-Bold", 30.0f)
+    let descFont = UIFont.FromName("Helvetica", 20.0f)
+
+    let label (str: String, font: UIFont): UILabel =
+        new UILabel(Text = str, Font = font, TranslatesAutoresizingMaskIntoConstraints = false, TextColor = UIColor.White)
 
     let loadNewsItems(): Unit = 
         // execute load in background and add news items once they are available
@@ -30,17 +33,12 @@ module NewsStation =
                 n
             else 
                 {head="NONE";desc="NONE";}) // TODO: is there a headOption in F#?
-        NextHeadline.Trigger(next.head)
-        NextDescription.Trigger(next.desc)
+        headFont.InvokeOnMainThread(fun _ ->
+            NextHeadline.Trigger(label(next.head, headFont))
+            NextDescription.Trigger(label(next.desc, descFont))
+        )
+
 
     do
         timer.Elapsed.Add(fun _ -> nextItem())
         timer.Start()
-
-//    member t.NextHeadline = nextHeadline
-//    member t.NextDescription = nextDescription
-
-    // TODO: other cleanup needed? Is this needed at all??
-//    interface IDisposable with
-//        member x.Dispose() = timer.Dispose()
-

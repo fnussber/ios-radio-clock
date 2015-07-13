@@ -11,7 +11,7 @@ type Station(name: String, url: NSUrl) =
     member this.Url = url
     new (name: String, urlString: String) = Station(name, new NSUrl(urlString))
 
-type Observer(event: Event<string>) =
+type Observer(event: Event<UIView>) =
     inherit NSObject()
     override this.ObserveValue(key: NSString, obj: NSObject, change: NSDictionary, context: IntPtr) = 
         Console.WriteLine("+++ item metadata changed +++")
@@ -19,12 +19,13 @@ type Observer(event: Event<string>) =
         | :? AVPlayerItem as i ->
             if i.TimedMetadata <> null then
                 let s = i.TimedMetadata.[0].ValueForKey(new NSString("value")).ToString()
-                event.Trigger(s)
+                let label = new UILabel(Text = s, Font = UIFont.FromName("Helvetica", 20.0f), TranslatesAutoresizingMaskIntoConstraints = false, TextColor = UIColor.White, BackgroundColor = UIColor.Clear)
+                this.InvokeOnMainThread(fun _ -> event.Trigger(label))
         | _ -> ()
 
 module Radio = 
 
-    let NextMetadata = new Event<string>()
+    let NextMetadata = new Event<UIView>()
 
     let private observer = new Observer(NextMetadata) // simpler way to do this using delegates?
 
