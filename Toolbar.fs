@@ -20,12 +20,13 @@ type Toolbar(clock: Clock) as this =
         let btn1 = addButton("alarm_clock-32.png", this.SetAlarm)
         let btn2 = addButton("radio-32.png", this.ToggleRadio)
 
-        //btn.Image <- new UIImage("timer-32.png")
-        //btn.Style <- UIBarButtonItemStyle.Plain
-        //btn.Clicked.Add(this.SetAlarm)
+        // make toolbar transparent
+        this.SetBackgroundImage(new UIImage(), UIToolbarPosition.Any, UIBarMetrics.Default)
+        this.SetShadowImage(new UIImage(), UIToolbarPosition.Any)
 
         this.TranslatesAutoresizingMaskIntoConstraints <- false  // important for auto layout!
         this.Items <- [|btn0; btn1; btn2|]
+
 
     member this.SetTimer(eventArgs: EventArgs): Unit =
         Console.WriteLine("set timer")

@@ -30,22 +30,19 @@ type AstroPics(view: UIImageView) =
 
 
 
-    let imageSource(input: String): Option<String> =
+    let imageSource (input: string): list<string> =
         let m = Regex.Match(input, "img src=\"([^\"]*)") 
-        if (m.Success) then Some(m.Groups.Item(1).Value) else None // group 0 is the whole matched expression, first group is 1
+        if (m.Success) then [m.Groups.Item(1).Value] else [] // group 0 is the whole matched expression, first group is 1
 
-    let imageSources(items: seq<NewsItem>): list<string> =   // is there a flatten in F#?
-        Seq.map (fun i -> imageSource(i.desc)) items
-        |> Seq.filter (fun i -> i.IsSome)
-        |> Seq.map (fun i -> i.Value)
-        |> Seq.toList
+    let imageSources (items: list<NewsItem>): list<string> =   
+        List.map (fun i -> imageSource(i.desc)) items |> List.concat // flatten list in case regexp didn't match
 
     let nextPicture(): Unit =
         img <- img + 1  // TODO: need error handling in case Download fails, to be sure inc first
         updatePicture()
         webClient.DownloadDataAsync(new Uri(List.nth images (img % images.Length)))  // TODO fails if images.Length is 0
 
-    let pictureLoaded(bytes: byte[]): Unit =
+    let pictureLoaded (bytes: byte[]): Unit =
         if (bytes.Length > 0) then
             nxtImage <- new UIImage(NSData.FromArray(bytes))
 

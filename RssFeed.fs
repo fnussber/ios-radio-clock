@@ -19,23 +19,19 @@ module RssFeed =
     let item(xml: XmlNode): NewsItem = 
         let v1 = xml.SelectSingleNode("title").InnerText
         let v2 = xml.SelectSingleNode("description").InnerText
-        let ni = { head = v1; desc = v2; }
-        ni
+        { head = v1; desc = v2; }
 
-    let getFeed(url: String): XmlDocument =  // TODO: DO IN BACKGROUND!
-        let req = HttpWebRequest.Create(url) :?> HttpWebRequest
-        let resp = req.GetResponse() // throws 501.. etc -> ERROR HANDLING!!!
-        let stream = resp.GetResponseStream()
-        let reader = new StreamReader(stream)
-        let xml = reader.ReadToEnd()
-
-        let doc = new XmlDocument()
-        doc.LoadXml xml // throws XmlException -> ERROR HANDLING!!
-        doc
-
-    let items(url: String): list<NewsItem> =
-        let xml = getFeed(url)
-        xmlItems xml |> List.map (fun i -> item i)
-
-
+    let items(url: string): list<NewsItem> =  // TODO: DO IN BACKGROUND!
+        try
+            let req    = HttpWebRequest.Create(url) :?> HttpWebRequest
+            let resp   = req.GetResponse()
+            let stream = resp.GetResponseStream()
+            let xml    = (new StreamReader(stream)).ReadToEnd()
+            let doc    = new XmlDocument()
+            doc.LoadXml xml
+            xmlItems doc |> List.map (fun i -> item i)
+        with
+            // in case something goes wrong catch the error and turn it into a news item
+            | e -> [{ head = "Could not read rss feed " + url; desc = e.Message; }]
+           
 

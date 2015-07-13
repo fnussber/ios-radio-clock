@@ -23,7 +23,7 @@ type Ticker(event: Event<string>, inSpeed: float, outSpeed: float) as this =
 
     do
         this.TranslatesAutoresizingMaskIntoConstraints <- false  // important for auto layout!
-        this.BackgroundColor <- UIColor.Black
+        this.BackgroundColor <- new UIColor(0.0f, 0.0f, 0.0f, 0.4f)
         Event.add (fun s -> Console.WriteLine("next"); this.nextMessage(s)) event.Publish
  
     abstract font: UIFont
