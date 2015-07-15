@@ -55,7 +55,7 @@ module WeatherStation =
     let getWeather() =
         let lat = if (locationManager.Location = null) then 0.0 else locationManager.Location.Coordinate.Latitude
         let long = if (locationManager.Location = null) then 0.0 else locationManager.Location.Coordinate.Longitude
-        let url = sprintf "http://api.openweathermap.org/data/2.5/weather?lat=%f&lon=%f&mode=xml" lat long
+        let url = sprintf "http://api.openweathermap.org/data/2.5/forecast/daily?lat=%f&lon=%f&mode=xml&units=metric&cnt=1" lat long
         let req = HttpWebRequest.Create(url) :?> HttpWebRequest
         let resp = req.GetResponse() // throws 501.. etc -> ERROR HANDLING!!!
         let stream = resp.GetResponseStream()
@@ -66,42 +66,45 @@ module WeatherStation =
         doc.LoadXml xml
         doc
 
-    let value (xml: XmlDocument, value: string, attribute: string) = (xml.SelectSingleNode("/current/" + value + "/@" + attribute)).InnerText
+    let value (xml: XmlDocument, value: string, attribute: string) = (xml.SelectSingleNode("/weatherdata/forecast/time/" + value + "/@" + attribute)).InnerText
 
-    let temperature xml = float(value (xml, "temperature", "value"))
+    let temperature (xml: XmlDocument) : (float * float * float) = 
+      (Math.Round(float(value (xml, "temperature", "day"))), Math.Round(float(value (xml, "temperature", "min"))), Math.Round(float(value (xml, "temperature", "max"))))
 
-    let humidity xml = float(value (xml, "humidity", "value"))
+//    let humidity xml = float(value (xml, "humidity", "value"))
 
-    let weather xml = value (xml, "weather", "value")
+//    let weather xml = value (xml, "weather", "value")
 
-    let icon xml = iconForId (value (xml, "weather", "icon"))
+    let icon xml = iconForId (value (xml, "symbol", "var"))
 
-    let printWeather xml = 
-//        let coord = locationManager.Location.Coordinate
-//        Console.WriteLine("lat         = " + coord.Latitude.ToString())
-//        Console.WriteLine("long        = " + coord.Longitude.ToString())
-        Console.WriteLine("temperature = " + temperature(xml).ToString())
-        Console.WriteLine("humidity    = " + humidity(xml).ToString())
-        Console.WriteLine("weather     = " + weather(xml).ToString())
-        Console.WriteLine("icon        = " + value(xml, "weather", "icon").ToString())
-        ()
+    let location(xml: XmlDocument): string = (xml.SelectSingleNode("/weatherdata/location/name")).InnerText
+
+//    let printWeather xml = 
+//        Console.WriteLine("temperature = " + temperature(xml).ToString())
+//        Console.WriteLine("humidity    = " + humidity(xml).ToString())
+//        Console.WriteLine("weather     = " + weather(xml).ToString())
+//        Console.WriteLine("icon        = " + value(xml, "weather", "icon").ToString())
+//        ()
 
 
     let weatherView() =
         let xml = getWeather()
 //        printWeather xml
+        Console.WriteLine(xml.InnerXml)
         let v = new UIView(TranslatesAutoresizingMaskIntoConstraints = false)
         let icon = new UIImageView(icon(xml)) 
-        icon.BackgroundColor <- new UIColor(1.0f, 1.0f, 1.0f, 0.5f)
-        let label = new UILabel(Text = weather(xml), TranslatesAutoresizingMaskIntoConstraints = false, TextColor = UIColor.White)
+        let city = location(xml)
+        let (cur, min, max) = temperature(xml)
+        let label = new UILabel(Text = (city + "   " + cur.ToString() + "°  ↓" + min.ToString() + "° ↑" + max.ToString() + "°"), TranslatesAutoresizingMaskIntoConstraints = false, TextColor = UIColor.White)
         icon.TranslatesAutoresizingMaskIntoConstraints <- false
+        label.TranslatesAutoresizingMaskIntoConstraints <- false
         v.AddSubview(icon)
         v.AddSubview(label)
 
         // layout
         let metrics = new NSDictionary()
         let views = new NSDictionary("icon", icon, "label", label)
-        let ch0 = NSLayoutConstraint.FromVisualFormat("H:|[icon(50)][label]|", NSLayoutFormatOptions.DirectionLeadingToTrailing, metrics, views) 
+        let ch0 = NSLayoutConstraint.FromVisualFormat("H:|[icon(50)]-10-[label]|", NSLayoutFormatOptions.DirectionLeadingToTrailing, metrics, views) 
         let cv0 = NSLayoutConstraint.FromVisualFormat("V:|[icon]|", NSLayoutFormatOptions.DirectionLeadingToTrailing, metrics, views) 
         let cv1 = NSLayoutConstraint.FromVisualFormat("V:|[label]|", NSLayoutFormatOptions.DirectionLeadingToTrailing, metrics, views) 
         v.AddConstraints(ch0)
@@ -122,7 +125,10 @@ module WeatherStation =
 //        locationManager.UpdatedLocation |> Event.add(fun evArgs -> Console.WriteLine("NEW POSITION"))
         locationManager.StartUpdatingLocation()
 
-        let timer = new System.Timers.Timer(10000.0)
+        // update first time, TOOD: do in background?, this will block
+//        locationManager.InvokeOnMainThread(fun _ -> NextWeather.Trigger(weatherView()))
+
+        let timer = new System.Timers.Timer(10000.0) // update every 5 minutes
         timer.Elapsed.Add(fun _ -> locationManager.InvokeOnMainThread(fun _ -> NextWeather.Trigger(weatherView())))
         timer.Start()
          

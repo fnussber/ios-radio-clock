@@ -17,9 +17,9 @@
 	<string>3.2</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Your current location is used for a localized weather forecast.</string>
+	<key>UIViewControllerBasedStatusBarAppearance</key>
+	<false/>
 	<key>UIStatusBarStyle</key>
-	<string>UIStatusBarStyleBlackTranslucent</string>
-	<key>UIStatusBarHidden</key>
-	<true/>
+	<string>UIStatusBarStyleLightContent</string>
 </dict>
 </plist>
