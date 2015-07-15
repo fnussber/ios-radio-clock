@@ -34,14 +34,14 @@ type RadioClockViewController() as this =
     override this.ViewDidLoad() = 
         base.ViewDidLoad()  
 
-        let metaTicker = new Ticker(Radio.NextMetadata, 0.5, 0.5)
-        let newsTicker1 = new Ticker(NewsStation.NextHeadline, 0.5, 0.5)
-        let newsTicker2 = new Ticker(NewsStation.NextDescription, 1.0, 6.0)
-        let weatherTicker = new Ticker(WeatherStation.NextWeather, 0.5, 0.5)
-        let placeHolder1 = new UILabel(TranslatesAutoresizingMaskIntoConstraints = false) // simpler way for place holder?
-        let placeHolder2 = new UILabel(TranslatesAutoresizingMaskIntoConstraints = false)
-        let background = new UIImageView(TranslatesAutoresizingMaskIntoConstraints = false, BackgroundColor = UIColor.Black)
-        let astroPics = new AstroPics(background)
+        let metaTicker    = new Ticker(Radio.NextMetadata, 0.5, 0.5)
+        let newsTicker1   = new Ticker(NewsStation.NextHeadline, 0.5, 0.5)
+        let newsTicker2   = new Ticker(NewsStation.NextDescription, 1.0, 6.0)
+        let weatherTicker = new Ticker(WeatherStation.NextWeather, 0.0, 0.0)
+        let placeHolder1  = new UILabel(TranslatesAutoresizingMaskIntoConstraints = false) // simpler way for place holder?
+        let placeHolder2  = new UILabel(TranslatesAutoresizingMaskIntoConstraints = false)
+        let background    = new UIImageView(TranslatesAutoresizingMaskIntoConstraints = false, BackgroundColor = UIColor.Black)
+        let astroPics     = new AstroPics(background)
 
         this.SetToolbarItems(toolbarItems(), true)
 

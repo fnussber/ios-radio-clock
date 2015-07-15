@@ -7,21 +7,23 @@ open System.Xml
 
 type NewsItem = {head: string; desc: string;}
 
+// Read news from an rss feed an turn them into a list of "news items"
+// which represent the headlines and their descriptions.
 module RssFeed = 
 
-    let xmlItems(doc: XmlDocument): list<XmlNode> = 
+    let xmlItems (doc: XmlDocument): list<XmlNode> = 
         let nodes = doc.SelectNodes("/rss/channel/item")
-        let iter = nodes.GetEnumerator()
+        let iter  = nodes.GetEnumerator()
         let mutable l: list<XmlNode> = List.Empty
         while iter.MoveNext() do l <- (iter.Current :?> XmlNode) :: l
         l
 
-    let item(xml: XmlNode): NewsItem = 
+    let item (xml: XmlNode): NewsItem = 
         let v1 = xml.SelectSingleNode("title").InnerText
         let v2 = xml.SelectSingleNode("description").InnerText
         { head = v1; desc = v2; }
 
-    let items(url: string): list<NewsItem> =  // TODO: DO IN BACKGROUND!
+    let items (url: string): list<NewsItem> =
         try
             let req    = HttpWebRequest.Create(url) :?> HttpWebRequest
             let resp   = req.GetResponse()

@@ -28,6 +28,7 @@ type Ticker(event: Event<UIView>, inSpeed: float, outSpeed: float) as this =
     member this.nextMessage(msg) =
 //        scrollOut()
         message.RemoveFromSuperview()
+        message.Dispose() // TODO: needed??
         message <- msg
         this.AddSubview(message)
         let metrics = new NSDictionary()

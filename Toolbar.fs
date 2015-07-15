@@ -16,9 +16,9 @@ type Toolbar(clock: Clock) as this =
         btn
 
     do 
-        let btn0 = addButton("timer-32.png", this.SetTimer)
-        let btn1 = addButton("alarm_clock-32.png", this.SetAlarm)
-        let btn2 = addButton("radio-32.png", this.ToggleRadio)
+        let btn0 = addButton("Timer-50.png", this.SetTimer)
+        let btn1 = addButton("Alarm Clock-50.png", this.SetAlarm)
+        let btn2 = addButton("Radio-50.png", this.ToggleRadio)
 
         // make toolbar transparent
         this.SetBackgroundImage(new UIImage(), UIToolbarPosition.Any, UIBarMetrics.Default)

@@ -14,7 +14,7 @@ open MonoTouch.UIKit
 // the dll inflates the binary beyond the maximum size allowed for the free Xamarin Studio version :(
 // Credits for weather icons: http://icons8.com/web-app/category/ios7/Weather
 
-/// Simple weather station that uses our current location to get weather information from openeweathermap.org
+/// Simple weather station that uses our current location to get weather information from openweathermap.org
 module WeatherStation =
 
     let NextWeather    = new Event<UIView>()
@@ -61,7 +61,6 @@ module WeatherStation =
         let stream = resp.GetResponseStream()
         let reader = new StreamReader(stream)
         let xml = reader.ReadToEnd()
-
         let doc = new XmlDocument()
         doc.LoadXml xml
         doc

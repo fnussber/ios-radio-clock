@@ -1,12 +1,17 @@
 ﻿<Properties StartupItem="RadioClock.fsproj" GitUserInfo="UsingGIT">
-  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug|iPhoneSimulator" PreferredExecutionTarget="MonoDevelop.IPhone.IPhoneSimulatorTarget.IPad2.8.3" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="RadioClockViewController.fs">
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug|iPhoneSimulator" PreferredExecutionTarget="MonoDevelop.IPhone.IPhoneSimulatorTarget.IPad2.8.4" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="Toolbar.fs">
     <Files>
       <File FileName="Info.plist" />
-      <File FileName="RadioClockViewController.fs" Line="95" Column="77" />
-      <File FileName="Toolbar.fs" Line="49" Column="1" />
-      <File FileName="AstroPics.fs" Line="1" Column="1" />
-      <File FileName="Ticker.fs" Line="26" Column="66" />
+      <File FileName="RadioClockViewController.fs" Line="40" Column="76" />
+      <File FileName="Toolbar.fs" Line="8" Column="25" />
+      <File FileName="AstroPics.fs" Line="27" Column="78" />
+      <File FileName="Ticker.fs" Line="31" Column="36" />
+      <File FileName="Alarm.fs" Line="1" Column="1" />
+      <File FileName="WeatherStation.fs" Line="15" Column="48" />
+      <File FileName="NewsStation.fs" Line="32" Column="96" />
+      <File FileName="RssFeed.fs" Line="16" Column="19" />
+      <File FileName="Radio.fs" Line="23" Column="1" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>

@@ -171,5 +171,8 @@
     <BundleResource Include="Resources\weather\storm-50.png" />
     <BundleResource Include="Resources\weather\sun-50.png" />
     <BundleResource Include="Resources\weather\unknown.png" />
+    <BundleResource Include="Resources\Alarm Clock-50.png" />
+    <BundleResource Include="Resources\Radio-50.png" />
+    <BundleResource Include="Resources\Timer-50.png" />
   </ItemGroup>
 </Project>
