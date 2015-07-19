@@ -21,18 +21,20 @@ module NewsStation =
         new UILabel(Text = str, Font = font, TranslatesAutoresizingMaskIntoConstraints = false, TextColor = UIColor.White)
 
     let nextNews (): option<NewsItem> =
-        lock nitems (fun _ ->
+//        lock nitems (fun _ ->
             let next = List.tryPick Some nitems
             nitems <- nitems.Tail
             next
-        )
+//        )
 
     // TODO: loading could be started several times in case it takes too long, can we easily avoid that?
     let produceNews (): Unit = 
         // if there are no more news items left then load a new batch of news in the background
         if (nitems.Length <= 1) then Async.Start ( async {
             let newestItems = List.append (RssFeed.items("http://www.tagesanzeiger.ch/rss.html")) [nextSegment]
-            lock nitems (fun _ -> nitems <- nitems |> List.append(newestItems))
+//          lock nitems (fun _ -> 
+            nitems <- nitems |> List.append(newestItems)
+//            )
         })
 
     let consumeNews (): Unit =

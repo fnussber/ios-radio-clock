@@ -1,50 +1,72 @@
 ﻿namespace RadioClock
 
 open System
-open System.Drawing
 open MonoTouch.UIKit
 open MonoTouch.Foundation
 
-type Toolbar(clock: Clock) as this = 
-    inherit UIToolbar()
+module Toolbar =
 
-    let addButton(image: string, handler) =
-        let btn = new UIBarButtonItem ()
-        btn.Image <- new UIImage(image)
+    let timerEvent = new Event<option<TimeSpan>>()
+    let alarmEvent = new Event<option<TimeSpan>>()
+    let radioEvent = new Event<string>()
+
+    let timerButton = timerEvent.Publish
+    let alarmButton = alarmEvent.Publish
+    let radioButton = radioEvent.Publish
+
+    let button image handler =
+        let btn = new UIBarButtonItem()
+        btn.Image <- new UIImage(image: string)
         btn.Style <- UIBarButtonItemStyle.Plain
-        btn.Clicked.Add(handler)
+        btn.Clicked.Add(handler(btn)) // note: handler needs to know button in order to display popup menu
         btn
 
-    do 
-        let btn0 = addButton("Timer-50.png", this.SetTimer)
-        let btn1 = addButton("Alarm Clock-50.png", this.SetAlarm)
-        let btn2 = addButton("Radio-50.png", this.ToggleRadio)
+    let timerMenuEntry str span =
+        UIAlertAction.Create(str, UIAlertActionStyle.Default, (fun _ -> timerEvent.Trigger span))
 
-        // make toolbar transparent
-        this.SetBackgroundImage(new UIImage(), UIToolbarPosition.Any, UIBarMetrics.Default)
-        this.SetShadowImage(new UIImage(), UIToolbarPosition.Any)
+    let timerMenu ctrl btn = 
+        let m = UIAlertController.Create("Timer", "Select Remaining Time", UIAlertControllerStyle.ActionSheet)  
+        m.PopoverPresentationController.BarButtonItem <- btn 
+        m.AddAction(timerMenuEntry "60 minutes" (Some(new TimeSpan(1,  0, 0)))) 
+        m.AddAction(timerMenuEntry "30 minutes" (Some(new TimeSpan(0, 30, 0)))) 
+        m.AddAction(timerMenuEntry "20 minutes" (Some(new TimeSpan(0, 20, 0)))) 
+        m.AddAction(timerMenuEntry "1 minute" (Some(new TimeSpan(0, 1, 0)))) 
+        m.AddAction(UIAlertAction.Create("Cancel", UIAlertActionStyle.Default, (fun _ -> timerEvent.Trigger None))) 
+        (ctrl: UIViewController).PresentViewController(m, true, null)
 
-        this.TranslatesAutoresizingMaskIntoConstraints <- false  // important for auto layout!
-        this.Items <- [|btn0; btn1; btn2|]
+    let alarmMenuEntry str span =
+        UIAlertAction.Create(str, UIAlertActionStyle.Default, (fun _ -> alarmEvent.Trigger span))
 
+    let alarmMenu ctrl btn = 
+        let m = UIAlertController.Create("Alarm", "Select Alarm Time", UIAlertControllerStyle.ActionSheet)  
+        m.PopoverPresentationController.BarButtonItem <- btn 
+        m.AddAction(alarmMenuEntry "07:00" (Some(new TimeSpan(7,  0 ,0)))) 
+        m.AddAction(alarmMenuEntry "07:30" (Some(new TimeSpan(7, 30 ,0)))) 
+        m.AddAction(alarmMenuEntry "08:00" (Some(new TimeSpan(8,  0 ,0)))) 
+        m.AddAction(UIAlertAction.Create("Cancel", UIAlertActionStyle.Default, (fun _ -> alarmEvent.Trigger None))) 
+        (ctrl: UIViewController).PresentViewController(m, true, null)
 
-    member this.SetTimer(eventArgs: EventArgs): Unit =
-        Console.WriteLine("set timer")
+//    let SetAlarm (eventArgs: EventArgs): Unit =
+//        let types = UIUserNotificationType.Alert
+//        let settings = UIUserNotificationSettings.GetSettingsForTypes(types, null)
+//        UIApplication.SharedApplication.RegisterUserNotificationSettings(settings)
+////        if clock.IsStopped() then 
+////            Alarm.Start(clock.Time())
+////            clock.StopBlink()
+////            clock.Start() 
+////        else 
+////            clock.Stop()
+////            clock.Blink()
+//        //this.NavigationController.ToolbarHidden <- true
 
-    member this.SetAlarm(eventArgs: EventArgs): Unit =
-        let types = UIUserNotificationType.Alert
-        let settings = UIUserNotificationSettings.GetSettingsForTypes(types, null)
-        UIApplication.SharedApplication.RegisterUserNotificationSettings(settings)
-        if clock.IsStopped() then 
-            Alarm.Start(new TimeSpan())
-            clock.StopBlink()
-            clock.Start() 
-        else 
-            clock.Stop()
-            clock.Blink()
+//    let SetTimer(eventArgs: EventArgs): Unit =
+//        Console.WriteLine("set timer")
+//        //this.NavigationController.ToolbarHidden <- true
 
-    member this.ToggleRadio(eventArgs: EventArgs): Unit =
-        if Radio.IsPlaying() then Radio.Stop() else Radio.Play()
-
+    let toolbarItems (ctrl)  = [|
+            button Layout.SleepIcon (fun btn _ -> timerMenu ctrl btn) 
+            button Layout.AlarmIcon (fun btn _ -> alarmMenu ctrl btn)
+            button Layout.RadioIcon (fun btn _ -> radioEvent.Trigger "")
+        |]
 
 

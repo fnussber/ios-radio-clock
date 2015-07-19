@@ -139,14 +139,16 @@
   <ItemGroup>
     <None Include="Info.plist" />
     <None Include="Entitlements.plist" />
+    <Compile Include="Layout.fs" />
+    <Compile Include="Toolbar.fs" />
     <Compile Include="Radio.fs" />
-    <Compile Include="Ticker.fs" />
+    <Compile Include="Digit.fs" />
     <Compile Include="Alarm.fs" />
+    <Compile Include="Ticker.fs" />
     <Compile Include="RssFeed.fs" />
     <Compile Include="AstroPics.fs" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Digit.fs" />
     <Compile Include="NewsStation.fs" />
     <Compile Include="WeatherStation.fs" />
     <Compile Include="RadioClockViewController.fs" />

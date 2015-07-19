@@ -53,17 +53,22 @@ module WeatherStation =
     let iconForId name = defaultArg (icons.TryFind name) unknownIcon
 
     let getWeather() =
-        let lat = if (locationManager.Location = null) then 0.0 else locationManager.Location.Coordinate.Latitude
-        let long = if (locationManager.Location = null) then 0.0 else locationManager.Location.Coordinate.Longitude
-        let url = sprintf "http://api.openweathermap.org/data/2.5/forecast/daily?lat=%f&lon=%f&mode=xml&units=metric&cnt=1" lat long
-        let req = HttpWebRequest.Create(url) :?> HttpWebRequest
-        let resp = req.GetResponse() // throws 501.. etc -> ERROR HANDLING!!!
-        let stream = resp.GetResponseStream()
-        let reader = new StreamReader(stream)
-        let xml = reader.ReadToEnd()
-        let doc = new XmlDocument()
-        doc.LoadXml xml
-        doc
+        try 
+            let lat = if (locationManager.Location = null) then 0.0 else locationManager.Location.Coordinate.Latitude
+            let long = if (locationManager.Location = null) then 0.0 else locationManager.Location.Coordinate.Longitude
+            let url = sprintf "http://api.openweathermap.org/data/2.5/forecast/daily?lat=%f&lon=%f&mode=xml&units=metric&cnt=1" lat long
+            let req = HttpWebRequest.Create(url) :?> HttpWebRequest
+            let resp = req.GetResponse() // throws 501.. etc -> ERROR HANDLING!!!
+            let stream = resp.GetResponseStream()
+            let reader = new StreamReader(stream)
+            let xml = reader.ReadToEnd()
+            let doc = new XmlDocument()
+            doc.LoadXml xml
+            Some(doc)
+        with
+            // in case something goes wrong catch the error and turn it into an label
+            | e -> None //new UILabel(Text = e.Message, TranslatesAutoresizingMaskIntoConstraints = false, TextColor = UIColor.White) :> UIView
+
 
     let value (xml: XmlDocument, value: string, attribute: string) = (xml.SelectSingleNode("/weatherdata/forecast/time/" + value + "/@" + attribute)).InnerText
 
@@ -78,38 +83,40 @@ module WeatherStation =
 
     let location(xml: XmlDocument): string = (xml.SelectSingleNode("/weatherdata/location/name")).InnerText
 
-//    let printWeather xml = 
-//        Console.WriteLine("temperature = " + temperature(xml).ToString())
-//        Console.WriteLine("humidity    = " + humidity(xml).ToString())
-//        Console.WriteLine("weather     = " + weather(xml).ToString())
-//        Console.WriteLine("icon        = " + value(xml, "weather", "icon").ToString())
-//        ()
+    let weatherLabel city temp minTemp maxTemp = 
+        new UILabel(
+            Text = (city + "   " + temp + "°  ↓" + minTemp + "° ↑" + maxTemp + "°"), 
+            TranslatesAutoresizingMaskIntoConstraints = false, 
+            TextColor = UIColor.White)
 
 
-    let weatherView() =
-        let xml = getWeather()
-//        printWeather xml
-        Console.WriteLine(xml.InnerXml)
-        let v = new UIView(TranslatesAutoresizingMaskIntoConstraints = false)
-        let icon = new UIImageView(icon(xml)) 
-        let city = location(xml)
-        let (cur, min, max) = temperature(xml)
-        let label = new UILabel(Text = (city + "   " + cur.ToString() + "°  ↓" + min.ToString() + "° ↑" + max.ToString() + "°"), TranslatesAutoresizingMaskIntoConstraints = false, TextColor = UIColor.White)
-        icon.TranslatesAutoresizingMaskIntoConstraints <- false
-        label.TranslatesAutoresizingMaskIntoConstraints <- false
-        v.AddSubview(icon)
-        v.AddSubview(label)
 
-        // layout
-        let metrics = new NSDictionary()
-        let views = new NSDictionary("icon", icon, "label", label)
-        let ch0 = NSLayoutConstraint.FromVisualFormat("H:|[icon(50)]-10-[label]|", NSLayoutFormatOptions.DirectionLeadingToTrailing, metrics, views) 
-        let cv0 = NSLayoutConstraint.FromVisualFormat("V:|[icon]|", NSLayoutFormatOptions.DirectionLeadingToTrailing, metrics, views) 
-        let cv1 = NSLayoutConstraint.FromVisualFormat("V:|[label]|", NSLayoutFormatOptions.DirectionLeadingToTrailing, metrics, views) 
-        v.AddConstraints(ch0)
-        v.AddConstraints(cv0)
-        v.AddConstraints(cv1)
-        v
+    let weatherView xml =
+        match xml with
+            | Some(xml) ->
+                //Console.WriteLine(xml.InnerXml)
+                let v = new UIView(TranslatesAutoresizingMaskIntoConstraints = false)
+                let icon = new UIImageView(icon(xml)) 
+                let city = location(xml)
+                let (cur, min, max) = temperature(xml)
+                let label = weatherLabel city (cur.ToString()) (min.ToString()) (max.ToString())
+                icon.TranslatesAutoresizingMaskIntoConstraints <- false
+                label.TranslatesAutoresizingMaskIntoConstraints <- false
+                v.AddSubview(icon)
+                v.AddSubview(label)
+
+                // layout
+                let metrics = new NSDictionary()
+                let views = new NSDictionary("icon", icon, "label", label)
+                let ch0 = NSLayoutConstraint.FromVisualFormat("H:|[icon(50)]-10-[label]|", NSLayoutFormatOptions.DirectionLeadingToTrailing, metrics, views) 
+                let cv0 = NSLayoutConstraint.FromVisualFormat("V:|[icon]|", NSLayoutFormatOptions.DirectionLeadingToTrailing, metrics, views) 
+                let cv1 = NSLayoutConstraint.FromVisualFormat("V:|[label]|", NSLayoutFormatOptions.DirectionLeadingToTrailing, metrics, views) 
+                v.AddConstraints(ch0)
+                v.AddConstraints(cv0)
+                v.AddConstraints(cv1)
+                v
+            | None ->
+                new UILabel(Text = "Couldn't read", TranslatesAutoresizingMaskIntoConstraints = false, TextColor = UIColor.White) :> UIView
 
 //    let weather(): seq<UIView> =
 //        Seq.unfold(fun weather -> Some(weather, weatherView())) (weatherView()) // produce a weather view over and over again, this will in fact reload everytime latest weather info
@@ -128,6 +135,12 @@ module WeatherStation =
 //        locationManager.InvokeOnMainThread(fun _ -> NextWeather.Trigger(weatherView()))
 
         let timer = new System.Timers.Timer(10000.0) // update every 5 minutes
-        timer.Elapsed.Add(fun _ -> locationManager.InvokeOnMainThread(fun _ -> NextWeather.Trigger(weatherView())))
+        timer.Elapsed.Add(fun _ -> 
+            System.Console.WriteLine(" --  Updating weather information --")
+            let xml = getWeather()                          // access rss feed on separate thread
+            locationManager.InvokeOnMainThread(fun _ ->     
+                NextWeather.Trigger(weatherView xml)        // do only UI stuff on main thread!
+            )
+        )
         timer.Start()
          

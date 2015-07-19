@@ -87,3 +87,9 @@ module Radio =
                 player <- None
             | None -> 
                 ()
+
+    do
+        Toolbar.radioButton.Add (fun _ ->
+            if IsPlaying() then Stop() else Play()
+        )
+

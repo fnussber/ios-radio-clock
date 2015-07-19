@@ -19,7 +19,9 @@ type AstroPics(view: UIImageView) =
     let updatePicture(): Unit =
         // todo: nxtImage could be null here..
         view.InvokeOnMainThread(fun _ ->
-            UIView.Transition(view, 3.0, UIViewAnimationOptions.TransitionCrossDissolve, (fun _ -> view.Image <- nxtImage), null)
+            using (nxtImage) (fun _ ->
+                UIView.Transition(view, 3.0, UIViewAnimationOptions.TransitionCrossDissolve, (fun _ -> view.Image <- nxtImage), null)
+            )
         )
 
     let loadPicItems(): Unit = 

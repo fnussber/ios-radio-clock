@@ -289,14 +289,14 @@ type Clock() as this =
     member this.Blink() =
         hh.Blink()
         mm.Blink()
-        ss.Hidden <- true
+        ss.Blink()
         this.SetNeedsLayout()
         this.LayoutIfNeeded()
 
     member this.StopBlink() =
         hh.StopBlink()
         mm.StopBlink()
-        ss.Hidden <- false
+        ss.StopBlink()
         this.SetNeedsLayout()
         this.LayoutIfNeeded()
 
