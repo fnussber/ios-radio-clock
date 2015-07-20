@@ -66,7 +66,7 @@ module Radio =
                 else if (p.Volume + d) > 1.0f then p.Volume <- 1.0f; t.Stop()
                 else                               p.Volume <- p.Volume + d
             | None   ->
-                ()
+                t.Stop()
 
     let fade d =
         let t = new System.Timers.Timer(1000.0)

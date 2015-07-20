@@ -16,9 +16,9 @@ module Config =
 
     // the radio stations
     let mutable stations = [
-        new Station("DRS1", "http://stream.srg-ssr.ch/drs1/mp3_128.m3u")
-        new Station("DRS2", "http://stream.srg-ssr.ch/drs2/mp3_128.m3u")
-        new Station("DRS3", "http://stream.srg-ssr.ch/drs3/mp3_128.m3u")
+        new Station("SRF 3", "http://stream.srg-ssr.ch/drs3/mp3_128.m3u")
+        new Station("SRF 2", "http://stream.srg-ssr.ch/drs2/mp3_128.m3u")
+        new Station("SRF 1", "http://stream.srg-ssr.ch/drs1/mp3_128.m3u")
     ]
 
     // a selection of sleep timers

@@ -43,7 +43,8 @@ module Alarm =
         match maybeNotification with
             | Some n -> 
                 UIApplication.SharedApplication.CancelLocalNotification(n)
-                UIApplication.SharedApplication.IdleTimerDisabled <- false
+                if (timer.IsNone && alarm.IsNone) then
+                    UIApplication.SharedApplication.IdleTimerDisabled <- false
             | None   ->
                 ()
 
@@ -113,9 +114,11 @@ module Alarm =
         if (alarm.IsSome && alarm.Value.FireDate.IsEqual(incoming.FireDate)) then 
             cancelAlarm()
             Radio.fadeIn()
+            UIScreen.MainScreen.Brightness <- 1.0f // reset original value!
         if (timer.IsSome && timer.Value.FireDate.IsEqual(incoming.FireDate)) then 
             cancelTimer()
             Radio.fadeOut()
+            UIScreen.MainScreen.Brightness <- 0.0f
 
     do 
         // init: deactive/hide sleep and alarm UI elements

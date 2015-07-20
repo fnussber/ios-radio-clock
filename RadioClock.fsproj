@@ -139,6 +139,7 @@
   <ItemGroup>
     <None Include="Info.plist" />
     <None Include="Entitlements.plist" />
+    <Compile Include="Config.fs" />
     <Compile Include="Layout.fs" />
     <Compile Include="Toolbar.fs" />
     <Compile Include="Radio.fs" />
@@ -148,7 +149,6 @@
     <Compile Include="Ticker.fs" />
     <Compile Include="RssFeed.fs" />
     <Compile Include="AstroPics.fs" />
-    <Compile Include="Config.fs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="NewsStation.fs" />

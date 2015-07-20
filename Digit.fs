@@ -10,13 +10,12 @@ open MonoTouch.UIKit
 type Digit(digit: String) as self =
     inherit UILabel()
 
-    let font = UIFont.FromName("Helvetica", 100.0f)
     let duration = 1.0
     let random = System.Random()
 
     do
         self.TranslatesAutoresizingMaskIntoConstraints <- false  // important for auto layout!
-        self.Font <- font
+        self.Font <- Layout.bigFont
         self.Text <- digit
         self.TextAlignment <- UITextAlignment.Center
         self.BackgroundColor <- UIColor.Clear// new UIColor(float32(random.NextDouble()), 0.0f, 0.0f, 0.5f)

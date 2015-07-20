@@ -5,6 +5,9 @@ open MonoTouch.Foundation
 
 module Layout =
 
+    let bigFont   = UIFont.FromName("Helvetica-Bold", 100.0f)
+    let smallFont = UIFont.FromName("Helvetica-Bold", 20.0f)
+
     // https://icons8.com/web-app/for/ios7
     let SleepIcon = "timer-32.png"
     let AlarmIcon = "alarm_clock-32.png"
