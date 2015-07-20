@@ -9,8 +9,6 @@ open MonoTouch.Foundation
 type RadioClockViewController() = 
     inherit UIViewController()
 
-    let clock: Clock = new Clock()
-
     // Release any cached data, images, etc that aren't in use.
     override this.DidReceiveMemoryWarning() =
         System.Console.WriteLine("Received memory warning") 
@@ -34,7 +32,7 @@ type RadioClockViewController() =
 
         this.View.AddSubviews(
             background, 
-            clock,
+            Clock.face,
             metaTicker,
             weatherTicker,
             newsTicker1,
@@ -50,7 +48,7 @@ type RadioClockViewController() =
             "metaTicker",       metaTicker      :> UIView 
             "newsTicker1",      newsTicker1     :> UIView
             "newsTicker2",      newsTicker2     :> UIView
-            "clock",            clock           :> UIView 
+            "clock",            Clock.face 
             "place1",           placeHolder1    :> UIView 
             "place2",           placeHolder2    :> UIView 
             "back",             background      :> UIView
@@ -72,7 +70,7 @@ type RadioClockViewController() =
        
         Layout.layout2 this.View formats views
 
-        clock.Start()
+        Clock.start()
 
 
     // Return true for supported orientations

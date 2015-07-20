@@ -93,6 +93,7 @@ module Alarm =
             | None    -> ()
 
     let setAlarm alarmTime =
+        if (not (List.exists (fun (t: TimeSpan) -> alarmTime.Equals(t)) Config.alarmTimes)) then Config.alarmTimes <-  Seq.take 3 (alarmTime :: Config.alarmTimes) |> Seq.toList
         alarmIco.Hidden <- false
         alarmLbl.Hidden <- false
         alarmRem.Hidden <- false
