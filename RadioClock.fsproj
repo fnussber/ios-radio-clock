@@ -178,5 +178,7 @@
     <BundleResource Include="Resources\Alarm Clock-50.png" />
     <BundleResource Include="Resources\Radio-50.png" />
     <BundleResource Include="Resources\Timer-50.png" />
+    <BundleResource Include="Resources\Radio Tower-50.png" />
+    <BundleResource Include="Resources\radio_tower-32.png" />
   </ItemGroup>
 </Project>

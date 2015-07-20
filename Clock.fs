@@ -89,9 +89,9 @@ module Clock =
 
         Layout.layout face formats views
 
-        // install a timer which will trigger an update of the clock
+        // install a timer which triggers an updates the clock digits
         timer.Elapsed.Add(fun _ -> pulse())
 
-        // register for toolbar interactions
-        Toolbar.usralEvent.Publish.Add(fun _ -> userAlarm())
+        // register toolbar interactions
+        Toolbar.userAlarmCreate.Add(fun _ -> userAlarm())
 

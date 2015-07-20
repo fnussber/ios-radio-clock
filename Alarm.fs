@@ -112,11 +112,10 @@ module Alarm =
         UIApplication.SharedApplication.IdleTimerDisabled <- false
         if (alarm.IsSome && alarm.Value.FireDate.IsEqual(incoming.FireDate)) then 
             cancelAlarm()
-            Radio.Play()
+            Radio.fadeIn()
         if (timer.IsSome && timer.Value.FireDate.IsEqual(incoming.FireDate)) then 
             cancelTimer()
-            Radio.Stop()
-
+            Radio.fadeOut()
 
     do 
         // init: deactive/hide sleep and alarm UI elements

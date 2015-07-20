@@ -6,11 +6,6 @@ open MonoTouch.AVFoundation
 open MonoTouch.Foundation
 open MonoTouch.UIKit
 
-type Station(name: String, url: NSUrl) =
-    member this.Name = name
-    member this.Url = url
-    new (name: String, urlString: String) = Station(name, new NSUrl(urlString))
-
 type Observer(event: Event<UIView>) =
     inherit NSObject()
     override this.ObserveValue(key: NSString, obj: NSObject, change: NSDictionary, context: IntPtr) = 
@@ -29,67 +24,73 @@ module Radio =
 
     let private observer = new Observer(NextMetadata) // simpler way to do this using delegates?
 
-    let mutable private stations = [
-        new Station("DRS1", "http://stream.srg-ssr.ch/drs1/mp3_128.m3u")
-        new Station("DRS2", "http://stream.srg-ssr.ch/drs2/mp3_128.m3u")
-        new Station("DRS3", "http://stream.srg-ssr.ch/drs3/mp3_128.m3u") ]
-
     let mutable player: Option<AVPlayer> = None
-    let mutable private station: Option<Station> = Some(stations.[0])//None
+    let mutable private station: Option<Station> = Some(Config.stations.[0])//None
 
     let AddStation s = 
-        stations <- s :: stations
+        Config.stations <- s :: Config.stations
 
     let RemoveStation sd = 
-        stations <- List.filter (fun s -> s <> sd) stations
+        Config.stations <- List.filter (fun s -> s <> sd) Config.stations
 
     let Stations() = 
-        stations |> List.sortBy (fun s -> s.Name)
-
-    let VolumeUp() u =
-        player |> Option.map(fun p -> p.Volume = Math.Min(1.0f, p.Volume + u))
-
-    let VolumeDown() d =
-        player |> Option.map(fun p -> p.Volume = Math.Max(0.0f, p.Volume - d))
+        Config.stations |> List.sortBy (fun s -> s.Name)
 
     let Mute() =
-        player |> Option.map(fun p -> p.Volume = 0.0f)
+        player |> Option.map(fun p -> p.Volume <- 0.0f) |> ignore
+
 
     let IsPlaying() = player <> None
 
-    let Play() = 
-        let item = new AVPlayerItem(new NSUrl("http://stream.srg-ssr.ch/drs3/mp3_128.m3u"))
+    let Play (station: Station) = 
+        let item = new AVPlayerItem(station.Url)
         item.AddObserver(observer, "timedMetadata", NSKeyValueObservingOptions.New + NSKeyValueObservingOptions.Initial, IntPtr(0))
         let avplayer = new AVPlayer(item)
         avplayer.Play()
         player <- Some(avplayer)
-//        // TODO: don't start again if already playing..
-//        player <- 
-//            match station with
-//                | Some s ->
-//                    let p = new AVPlayer(new NSUrl("http://stream.srg-ssr.ch/drs3/mp3_128.m3u"))
-//                    //Thread.Sleep(2000)
-//                    //p.Volume <- 1.0f
-//                    //p.ReplaceCurrentItemWithPlayerItem
-//                    //view.Layer.AddSublayer(AVPlayerLayer.FromPlayer(p))
-//                    //AVAudioSession.SharedInstance().SetCategory(AVAudioSessionCategory.Playback) |> ignore
-//                    p.Play()
-//                    Some(p)
-//                | None ->
-//                    None
 
     let Stop() =
         match player with
             | Some p -> 
+                player <- None
                 p.Pause()
                 p.CurrentItem.RemoveObserver(observer, "timedMetadata")
                 p.Dispose()
-                player <- None
             | None -> 
                 ()
 
+    let fadeVolume (t: Timers.Timer) d =
+        match player with
+            | Some p ->
+                if      (p.Volume + d) < 0.0f then t.Stop(); Stop()
+                else if (p.Volume + d) > 1.0f then p.Volume <- 1.0f; t.Stop()
+                else                               p.Volume <- p.Volume + d
+            | None   ->
+                ()
+
+    let fade d =
+        let t = new System.Timers.Timer(1000.0)
+        t.Elapsed.Add(fun _ -> 
+            System.Console.WriteLine("fade")
+            fadeVolume t d
+        )
+        t.Start()
+
+    let fadeIn() =
+        Play(Config.stations.Head)
+        Mute()
+        fade(1.0f/Config.fadeInDuration)
+
+    let fadeOut() =
+        fade(-1.0f/Config.fadeOutDuration)
+
     do
         Toolbar.radioButton.Add (fun _ ->
-            if IsPlaying() then Stop() else Play()
+            if IsPlaying() then Stop() else Play(Config.stations.Head)
+        )
+
+        Toolbar.stationButton.Add (fun s ->
+            Stop()
+            Play(s)
         )
 
