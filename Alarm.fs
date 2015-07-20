@@ -4,7 +4,8 @@ open System
 open MonoTouch.Foundation
 open MonoTouch.UIKit
 
-
+// Deal with two types of alarms: a sleep timer, which will turn the
+// radio off after a given time, and the actual alarm clock.
 module Alarm = 
 
     let mutable timer: option<UILocalNotification> = None
@@ -12,8 +13,9 @@ module Alarm =
 
     let sleepIco = Layout.coloredIcon Layout.SleepIcon UIColor.White
     let alarmIco = Layout.coloredIcon Layout.AlarmIcon UIColor.White
-    let sleepLbl = Layout.coloredText "00:00" UIColor.White
-    let alarmLbl = Layout.coloredText "00:00" UIColor.White
+    let sleepLbl = Layout.coloredText "" UIColor.White
+    let alarmLbl = Layout.coloredText "" UIColor.White
+    let alarmRem = Layout.coloredText "" UIColor.White
 
     let StatusBar (): UIView =
         let view = new UIView(TranslatesAutoresizingMaskIntoConstraints = false)
@@ -23,30 +25,19 @@ module Alarm =
             "sleepLbl", sleepLbl :> UIView
             "alarmIco", alarmIco :> UIView
             "alarmLbl", alarmLbl :> UIView
+            "alarmRem", alarmRem :> UIView
         ]   
         let formats = [
             "V:|[sleepIco]"
-            "V:|[sleepLbl]"
+            "V:|[sleepLbl]|"
             "V:|[alarmIco]"
-            "V:|[alarmLbl]"
+            "V:|[alarmLbl][alarmRem]|"
             "H:|[sleepIco]-[sleepLbl(100)]-[alarmIco]-[alarmLbl(100)]|"
+            "H:[alarmRem(100)]|"
         ]
         Layout.layout view formats views
         
         view
-
-    let StartTimer () =
-        Console.WriteLine("start timer")
-        Radio.Play
-
-//    let CancelTimer () =
-//        Console.WriteLine("cancel timer")
-
-//    let DoTimer timer =
-//        Console.WriteLine("do timer")
-//        removeTimer timer
-//        Radio.Stop
-
 
     let cancelNotification maybeNotification =
         match maybeNotification with
@@ -58,20 +49,24 @@ module Alarm =
 
     let cancelAlarm () =
         cancelNotification alarm
+        alarmIco.Hidden <- true
+        alarmLbl.Hidden <- true
+        alarmRem.Hidden <- true
         alarm <- None 
 
     let cancelTimer () =
         cancelNotification timer
+        sleepIco.Hidden <- true
+        sleepLbl.Hidden <- true
         timer <- None 
 
     let createNotification nsdate =
-        let notif  = new UILocalNotification()
-        notif.FireDate <- nsdate
-        notif.AlertAction <- "Wecki, wecki!"
-        notif.AlertBody <- "Hey, an alert went off."
+        let notif  = new UILocalNotification(FireDate = nsdate)
+//        notif.FireDate <- nsdate
+        notif.AlertAction <- "Wecki, wecki"
+        notif.AlertBody <- "Hey, an alert went off"
         UIApplication.SharedApplication.IdleTimerDisabled <- true
         UIApplication.SharedApplication.ScheduleLocalNotification(notif)
-        let xxxx = new NSDate()
         notif
 
     let setAlarm2 alarmTime =
@@ -85,70 +80,69 @@ module Alarm =
         // TODO: find a better way, how do we deal with local time vs utc here??? need to subtract two hours for time zone and daylight savings
         NSDate.FromTimeIntervalSinceReferenceDate((alert2 - reference).TotalSeconds).AddSeconds(-1.0*3600.0)
 
+    let remainingTime (n: UILocalNotification) =
+        let s = n.FireDate.SecondsSinceReferenceDate - (new NSDate()).SecondsSinceReferenceDate
+        TimeSpan(0, 0, int(s))
+
+    let updateRemaining (l: UILabel) n =
+        match n with
+            | Some(n) ->
+                l.InvokeOnMainThread(fun _ -> 
+                    l.Text <- (remainingTime n).ToString()
+                )
+            | None    -> ()
+
     let setAlarm alarmTime =
-        createNotification (setAlarm2 alarmTime)
+        alarmIco.Hidden <- false
+        alarmLbl.Hidden <- false
+        alarmRem.Hidden <- false
+        alarmLbl.Text   <- alarmTime.ToString()
+        alarm <- Some(createNotification (setAlarm2 alarmTime))
+        updateRemaining alarmRem alarm
 
     let setTimer (timerTime: TimeSpan) =
-        createNotification ((new NSDate()).AddSeconds(timerTime.TotalMilliseconds/1000.0))
+        sleepIco.Hidden <- false
+        sleepLbl.Hidden <- false
+        timer <- Some(createNotification ((new NSDate()).AddSeconds(timerTime.TotalSeconds)))
+        updateRemaining sleepLbl timer
 
-    let Do (incoming: UILocalNotification) =
-        Console.WriteLine("do alarm")
+    // Handle incoming system notifications
+    let handleNotification (incoming: UILocalNotification) =
         UIApplication.SharedApplication.IdleTimerDisabled <- false
         if (alarm.IsSome && alarm.Value.FireDate.IsEqual(incoming.FireDate)) then 
-            alarm <- None
+            cancelAlarm()
             Radio.Play()
         if (timer.IsSome && timer.Value.FireDate.IsEqual(incoming.FireDate)) then 
-            timer <- None
+            cancelTimer()
             Radio.Stop()
 
+
     do 
-        // init: sleep and alarm icons are not active/hidden
-        sleepIco.Hidden <- true
-        sleepLbl.Hidden <- true
-        alarmIco.Hidden <- true
-        alarmLbl.Hidden <- true
+        // init: deactive/hide sleep and alarm UI elements
+        cancelAlarm()
+        cancelTimer()
 
         // hide/show sleep state
         Toolbar.timerButton.Add (fun maybeSpan ->
+            cancelTimer()
             match maybeSpan with
-                | Some(span) ->
-                    sleepIco.Hidden <- false
-                    sleepLbl.Hidden <- false
-                    sleepLbl.Text   <- span.ToString()
-                    cancelTimer ()
-                    timer <- Some(setTimer span)
-                | None      ->
-                    sleepIco.Hidden <- true
-                    sleepLbl.Hidden <- true
-                    cancelTimer ()
+                | Some(span) -> setTimer span
+                | None       -> ()
         )
 
         // hide/show alarm state
         Toolbar.alarmButton.Add (fun maybeSpan ->
+            cancelAlarm()
             match maybeSpan with
-                | Some(span) ->
-                    alarmIco.Hidden <- false
-                    alarmLbl.Hidden <- false
-                    alarmLbl.Text   <- span.ToString()
-                    cancelAlarm ()
-                    alarm <- Some(setAlarm span)
-                | None      ->
-                    alarmIco.Hidden <- true
-                    alarmLbl.Hidden <- true
-                    cancelAlarm ()
+                | Some(span) -> setAlarm span
+                | None       -> ()
         )
 
-        // install a timer that updates the sleep timer remaining time
+        // install a timer that updates the remaining time labels
         let ttt = new System.Timers.Timer(1000.0)
         ttt.Elapsed.Add(fun _ -> 
-            match timer with
-                | Some(t) -> 
-                    sleepLbl.InvokeOnMainThread(fun _ ->
-                        let remaining = t.FireDate.SecondsSinceReferenceDate - (new NSDate()).SecondsSinceReferenceDate
-                        sleepLbl.Text <- (new TimeSpan(0,0,int(remaining))).ToString()
-                    )
-                | None    -> 
-                    ()
+            updateRemaining sleepLbl timer
+            updateRemaining alarmRem alarm
         )
         ttt.Start()
 

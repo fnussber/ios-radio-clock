@@ -21,7 +21,7 @@ type AppDelegate() =
 
     override this.ReceivedLocalNotification(app, notification) =
         Console.WriteLine("RECEIVED LOCAL NOTIFICATION! - WE WERE IN FOREGROUND")
-        Alarm.Do notification
+        Alarm.handleNotification notification
 
 module Main = 
     [<EntryPoint>]
