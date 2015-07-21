@@ -43,8 +43,8 @@ module Alarm =
         match maybeNotification with
             | Some n -> 
                 UIApplication.SharedApplication.CancelLocalNotification(n)
-                if (timer.IsNone && alarm.IsNone) then
-                    UIApplication.SharedApplication.IdleTimerDisabled <- false
+//                if (timer.IsNone && alarm.IsNone) then
+//                    UIApplication.SharedApplication.IdleTimerDisabled <- false
             | None   ->
                 ()
 
@@ -66,7 +66,7 @@ module Alarm =
 //        notif.FireDate <- nsdate
         notif.AlertAction <- "Wecki, wecki"
         notif.AlertBody <- "Hey, an alert went off"
-        UIApplication.SharedApplication.IdleTimerDisabled <- true
+//        UIApplication.SharedApplication.IdleTimerDisabled <- true
         UIApplication.SharedApplication.ScheduleLocalNotification(notif)
         notif
 
@@ -110,7 +110,7 @@ module Alarm =
 
     // Handle incoming system notifications
     let handleNotification (incoming: UILocalNotification) =
-        UIApplication.SharedApplication.IdleTimerDisabled <- false
+//        UIApplication.SharedApplication.IdleTimerDisabled <- false
         if (alarm.IsSome && alarm.Value.FireDate.IsEqual(incoming.FireDate)) then 
             cancelAlarm()
             Radio.fadeIn()
@@ -139,6 +139,14 @@ module Alarm =
             match maybeSpan with
                 | Some(span) -> setAlarm span
                 | None       -> ()
+        )
+
+        Toolbar.dayModeSelected.Add (fun _ ->
+            UIScreen.MainScreen.Brightness <- 1.0f
+        )
+
+        Toolbar.nightModeSelected.Add (fun _ ->
+            UIScreen.MainScreen.Brightness <- 0.0f
         )
 
         // install a timer that updates the remaining time labels

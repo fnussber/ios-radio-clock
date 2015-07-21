@@ -11,12 +11,16 @@ module Toolbar =
     let private stationEvent = new Event<Station>()
     let private usralEvent   = new Event<string>()
     let private radioEvent   = new Event<string>()
+    let private nightModeEvent   = new Event<string>()
+    let private dayModeEvent   = new Event<string>()
 
-    let timerButton = timerEvent.Publish
-    let alarmButton = alarmEvent.Publish
-    let stationButton = stationEvent.Publish
-    let radioButton = radioEvent.Publish
-    let userAlarmCreate = usralEvent.Publish
+    let timerButton         = timerEvent.Publish
+    let alarmButton         = alarmEvent.Publish
+    let stationButton       = stationEvent.Publish
+    let radioButton         = radioEvent.Publish
+    let userAlarmCreate     = usralEvent.Publish
+    let dayModeSelected     = dayModeEvent.Publish
+    let nightModeSelected   = nightModeEvent.Publish
 
     let button image handler =
         let btn = 
@@ -60,14 +64,20 @@ module Toolbar =
         stationButton.Add(fun _ -> ctrl.NavigationController.ToolbarHidden <- true)
         radioButton.Add  (fun _ -> ctrl.NavigationController.ToolbarHidden <- true)
         userAlarmCreate.Add  (fun _ -> ctrl.NavigationController.ToolbarHidden <- true)
+        nightModeSelected.Add  (fun _ -> ctrl.NavigationController.ToolbarHidden <- true)
+        dayModeSelected.Add  (fun _ -> ctrl.NavigationController.ToolbarHidden <- true)
 
         // create toolbar buttons, note that the menus are created "on-the-fly", i.e. they
         // will reflect changes to the underlying data that represents the selectable items
         [|
             button Layout.SleepIcon   (fun btn _ -> timerMenu   ctrl btn) 
             button Layout.AlarmIcon   (fun btn _ -> alarmMenu   ctrl btn)
+            new UIBarButtonItem(UIBarButtonSystemItem.FlexibleSpace, null)
             button Layout.StationIcon (fun btn _ -> stationMenu ctrl btn)
             button Layout.RadioIcon   (fun btn _ -> radioEvent.Trigger "")
+            new UIBarButtonItem(UIBarButtonSystemItem.FlexibleSpace, null)
+            button Layout.MoonIcon    (fun btn _ -> nightModeEvent.Trigger "")
+            button Layout.SunIcon     (fun btn _ -> dayModeEvent.Trigger "")
         |]
        
 

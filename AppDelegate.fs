@@ -7,6 +7,13 @@ open MonoTouch.Foundation
 [<Register("AppDelegate")>]
 type AppDelegate() = 
     inherit UIApplicationDelegate()
+
+    do
+        NSNotificationCenter.DefaultCenter.AddObserver(UIApplication.DidBecomeActiveNotification, fun _ ->
+            Console.WriteLine("disabling idle timer")
+            UIApplication.SharedApplication.IdleTimerDisabled <- true
+        ) |> ignore
+
     member val Window = null with get, set
 
     // This method is invoked when the application is ready to run.
@@ -22,6 +29,7 @@ type AppDelegate() =
     override this.ReceivedLocalNotification(app, notification) =
         Console.WriteLine("RECEIVED LOCAL NOTIFICATION! - WE WERE IN FOREGROUND")
         Alarm.handleNotification notification
+
 
 module Main = 
     [<EntryPoint>]

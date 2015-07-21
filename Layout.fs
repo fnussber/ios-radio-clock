@@ -9,10 +9,12 @@ module Layout =
     let smallFont = UIFont.FromName("Helvetica-Bold", 20.0f)
 
     // https://icons8.com/web-app/for/ios7
-    let SleepIcon = "timer-32.png"
-    let AlarmIcon = "alarm_clock-32.png"
-    let RadioIcon = "radio-32.png"
+    let SleepIcon   = "timer-32.png"
+    let AlarmIcon   = "alarm_clock-32.png"
+    let RadioIcon   = "radio-32.png"
     let StationIcon = "radio_tower-32.png"
+    let MoonIcon    = "weather/moon-50.png"
+    let SunIcon     = "weather/sun-50.png"
 
     let constraintsFromFormat str metrics views =
         NSLayoutConstraint.FromVisualFormat(str, NSLayoutFormatOptions.DirectionLeadingToTrailing, metrics, views)

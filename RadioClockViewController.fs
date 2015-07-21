@@ -72,7 +72,6 @@ type RadioClockViewController() =
 
         Clock.start()
 
-
     // Return true for supported orientations
     override this.ShouldAutorotateToInterfaceOrientation(orientation) = true
 
@@ -81,7 +80,10 @@ type RadioClockViewController() =
         //this.View.LayoutIfNeeded()
 
     override this.TouchesBegan(touches, event) =
-        this.NavigationController.ToolbarHidden <- false
+        // toggle toolbar when user touches screen EXCEPT for the case where the
+        //  clock is stopped in order to let the user enter a new alarm time
+        if (not (Clock.isStopped())) then
+            this.NavigationController.ToolbarHidden <- not this.NavigationController.ToolbarHidden
 
     override this.ViewWillAppear(animated) =
         base.ViewWillAppear(animated)
