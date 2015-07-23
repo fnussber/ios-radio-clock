@@ -11,11 +11,11 @@ module Alarm =
     let mutable timer: option<UILocalNotification> = None
     let mutable alarm: option<UILocalNotification> = None
 
-    let sleepIco = Layout.coloredIcon Layout.SleepIcon UIColor.White
-    let alarmIco = Layout.coloredIcon Layout.AlarmIcon UIColor.White
-    let sleepLbl = Layout.coloredText "" UIColor.White
-    let alarmLbl = Layout.coloredText "" UIColor.White
-    let alarmRem = Layout.coloredText "" UIColor.White
+    let sleepIco = Layout.icon Layout.SleepIcon
+    let alarmIco = Layout.icon Layout.AlarmIcon
+    let sleepLbl = Layout.label "" Layout.TinyFont
+    let alarmLbl = Layout.label "" Layout.TinyFont
+    let alarmRem = Layout.label "" Layout.TinyFont
 
     let StatusBar : UIView =
         let view = new UIView(TranslatesAutoresizingMaskIntoConstraints = false)

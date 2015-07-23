@@ -4,6 +4,7 @@ open System
 open System.Drawing
 open MonoTouch.CoreAnimation
 open MonoTouch.CoreGraphics
+open MonoTouch.CoreText
 open MonoTouch.Foundation
 open MonoTouch.UIKit
 
@@ -12,6 +13,20 @@ type Digit(digit: String) as self =
 
     let duration = 1.0
     let random = System.Random()
+
+//    let attrs = 
+//        new CTStringAttributes(
+//            Font = new CTFont("Helvetica-Bold", 30.0f),
+//            StrokeColor = UIColor.Black.CGColor,
+//            ForegroundColor= UIColor.White.CGColor,
+//            StrokeWidth =    Nullable -1.0f
+//        )
+//
+//    let attrText digit =
+//        new NSAttributedString(
+//            digit,
+//            attrs
+//        )
 
     do
         self.TranslatesAutoresizingMaskIntoConstraints <- false  // important for auto layout!
@@ -166,29 +181,8 @@ type Digit2 (up: NSAction, down: NSAction) as this =
                 label0.Text <- d.ToString()
                 label1.Text <- (next.ToString())
                 d <- next
-//                let cb = this.Bgc()
-//                this.BackgroundColor <- cb
-//                let c = this.Bgc()
-//                label0.BackgroundColor <- c
-//                label1.BackgroundColor <- c
                 )
             )
-
-
-//type DigitH() =
-//    inherit Digit2()
-//    let random = System.Random()
-//    override this.Bgc() = new UIColor(float32(random.NextDouble()) + 0.3f, 0.0f, 0.0f, 0.5f)
-
-//type DigitM() =
-//    inherit Digit2()
-//    let random = System.Random()
-//    override this.Bgc() = new UIColor(0.0f, float32(random.NextDouble()) + 0.3f, 0.0f, 0.5f)
-
-//type DigitS() =
-//    inherit Digit2()
-//    let random = System.Random()
-//    override this.Bgc() = new UIColor(0.0f, 0.0f, float32(random.NextDouble()) + 0.3f, 0.5f)
 
 //[<AbstractClass>]
 type TwoDigits(maxValue: int) as this =
@@ -203,17 +197,18 @@ type TwoDigits(maxValue: int) as this =
 
     do
         this.TranslatesAutoresizingMaskIntoConstraints <- false  // important for auto layout!
-        this.AddSubview(d1) 
-        this.AddSubview(d0)
 
-        let metrics = new NSDictionary()
-        let views = new NSDictionary("d1", d1, "d0", d0)
-        let ch = NSLayoutConstraint.FromVisualFormat("H:|[d1][d0(==d1)]|", NSLayoutFormatOptions.DirectionLeadingToTrailing, metrics, views) 
-        let cv1 = NSLayoutConstraint.FromVisualFormat("V:|[d1]|", NSLayoutFormatOptions.DirectionLeadingToTrailing, metrics, views) 
-        let cv2 = NSLayoutConstraint.FromVisualFormat("V:|[d0]|", NSLayoutFormatOptions.DirectionLeadingToTrailing, metrics, views) 
-        this.AddConstraints(ch)
-        this.AddConstraints(cv1)
-        this.AddConstraints(cv2)
+        let views = [
+            "d0", d0 :> UIView
+            "d1", d1 :> UIView
+        ]
+        let formats = [
+            "H:|[d1][d0(==d1)]|"
+            "V:|[d1]|" 
+            "V:|[d0]|"       
+        ]
+
+        Layout.layout this formats views
 
     member this.Blink() =
         d1.Blink()

@@ -7,6 +7,7 @@ module Layout =
 
     let bigFont   = UIFont.FromName("Helvetica-Bold", 100.0f)
     let smallFont = UIFont.FromName("Helvetica-Bold", 20.0f)
+    let TinyFont  = UIFont.FromName("Helvetica", 15.0f)
 
     // https://icons8.com/web-app/for/ios7
     let SleepIcon   = "timer-32.png"
@@ -33,13 +34,29 @@ module Layout =
         List.map (fun (l:string, v) -> (viewsDict.Add(new NSString(l), v))) views |> ignore
         List.map (fun f      -> view.AddConstraints(constraintsFromFormat f metricsDict viewsDict)) formats |> ignore
 
-    let coloredText str color =
-        new UILabel(Text = str, TextColor = color, TranslatesAutoresizingMaskIntoConstraints = false)
+    let label str font =
+        new UILabel(
+            Text = str,
+            Font = font,
+            TextColor = UIColor.White,
+            BackgroundColor = UIColor.Clear,
+            TextAlignment = UITextAlignment.Center,
+            TranslatesAutoresizingMaskIntoConstraints = false)
 
-    let coloredIcon (str: string) (color: UIColor) =
+    let icon (str: string) =
         let img  = new UIImage(str)
         let ico  = img.ImageWithRenderingMode UIImageRenderingMode.AlwaysTemplate
-        new UIImageView(Image = ico, TintColor = color, TranslatesAutoresizingMaskIntoConstraints = false)
+        new UIImageView(Image = ico, TintColor = UIColor.White, TranslatesAutoresizingMaskIntoConstraints = false)
+
+    let button str color =
+        let b = UIButton.FromType(UIButtonType.RoundedRect)
+        b.TranslatesAutoresizingMaskIntoConstraints <- false
+        b.SetTitle(str, UIControlState.Normal)
+        b.BackgroundColor <- color
+        b.SetTitleColor(UIColor.White, UIControlState.Normal)
+        //    setBtn.SetTitleShadowColor(UIColor.Black, UIControlState.Normal)
+        b.Font <- smallFont
+        b
 
 
 

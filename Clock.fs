@@ -14,25 +14,14 @@ module Clock =
     let face  = new UIView()
     let timer = new System.Timers.Timer(1000.0)
 
-    let hh = new TwoDigits(24)
-    let mm = new TwoDigits(60)
-    let ss = new TwoDigits(60)
+    let hh        = new TwoDigits(24)
+    let c1        = Layout.label ":" Layout.bigFont
+    let mm        = new TwoDigits(60)
+    let c2        = Layout.label ":" Layout.bigFont
+    let ss        = new TwoDigits(60)
 
-    let setBtn = UIButton.FromType(UIButtonType.RoundedRect)
-    setBtn.TranslatesAutoresizingMaskIntoConstraints <- false
-    setBtn.SetTitle("Set", UIControlState.Normal)
-    setBtn.BackgroundColor <- UIColor.Green
-    setBtn.SetTitleColor(UIColor.White, UIControlState.Normal)
-//    setBtn.SetTitleShadowColor(UIColor.Black, UIControlState.Normal)
-    setBtn.Font <- Layout.smallFont
-
-    let cancelBtn = UIButton.FromType(UIButtonType.RoundedRect)
-    cancelBtn.TranslatesAutoresizingMaskIntoConstraints <- false
-    cancelBtn.SetTitle("Cancel", UIControlState.Normal)
-    cancelBtn.BackgroundColor <- UIColor.Red
-    cancelBtn.SetTitleColor(UIColor.White, UIControlState.Normal)
-//    cancelBtn.SetTitleShadowColor(UIColor.Black, UIControlState.Normal)
-    cancelBtn.Font <- Layout.smallFont
+    let setBtn    = Layout.button "Set"    UIColor.Green
+    let cancelBtn = Layout.button "Cancel" UIColor.Red
 
     let time () =
         new TimeSpan(hh.Value, mm.Value, ss.Value)
@@ -105,19 +94,23 @@ module Clock =
 
         let views = [
             "hh", hh :> UIView
+            "c1", c1 :> UIView
             "mm", mm :> UIView
+            "c2", c2 :> UIView
             "ss", ss :> UIView
             "set", setBtn :> UIView
             "cancel", cancelBtn :> UIView
         ]
         let formats = [
-            "H:|[hh]-25-[mm(==hh)]-25-[ss(==hh)]|"
+            "H:|[hh]-[c1(25)]-[mm(==hh)]-[c2(25)]-[ss(==hh)]|"
 //            "H:|[hh]-25-[mm(==hh)][set(==hh)]|"
 //            "H:|[hh]-25-[mm(==hh)][cancel(==hh)]|"
             "H:[set(150)]|"
             "H:[cancel(150)]|"
             "V:|[hh]|"
+            "V:|[c1]|"
             "V:|[mm]|"
+            "V:|[c2]|"
             "V:|[ss]|"
             "V:|-[set]-[cancel(==set)]-|"
         ]

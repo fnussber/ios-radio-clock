@@ -9,16 +9,30 @@ open MonoTouch.Foundation
 type RadioClockViewController() = 
     inherit UIViewController()
 
-    let background = new UIImageView(TranslatesAutoresizingMaskIntoConstraints = false, BackgroundColor = UIColor.Black)
+    let background = 
+        new UIImageView(
+            TranslatesAutoresizingMaskIntoConstraints = false, 
+            BackgroundColor = UIColor.Black, 
+            ContentMode = UIViewContentMode.ScaleAspectFill)
+
+    let astroPicTitle = Layout.label "" Layout.smallFont
 
     let updateBackground (img: UIImage) : Unit = 
         background.InvokeOnMainThread(fun _ ->
             UIView.Transition(background, 3.0, UIViewAnimationOptions.TransitionCrossDissolve, (fun _ -> background.Image <- img), null)
         )
 
+    let updateTitle title : Unit = 
+        background.InvokeOnMainThread(fun _ ->
+                astroPicTitle.Text <- title
+        )
+
     do 
         // install handler for background updates
-        AstroPics.NextPicture.Add(fun pic -> updateBackground pic.image)
+        AstroPics.NextPicture.Add(fun pic -> 
+            updateBackground pic.image
+            updateTitle      pic.title
+        )
 
     // Release any cached data, images, etc that aren't in use.
     override this.DidReceiveMemoryWarning() =
@@ -35,11 +49,14 @@ type RadioClockViewController() =
         let weatherTicker = new Ticker(WeatherStation.NextWeather, 0.0, 0.0)
         let placeHolder1  = new UILabel(TranslatesAutoresizingMaskIntoConstraints = false)
         let placeHolder2  = new UILabel(TranslatesAutoresizingMaskIntoConstraints = false)
+        let placeHolder3  = new UILabel(TranslatesAutoresizingMaskIntoConstraints = false)
+        let placeHolder4  = new UILabel(TranslatesAutoresizingMaskIntoConstraints = false)
 
         this.SetToolbarItems(Toolbar.toolbarItems(this), true)
 
         this.View.AddSubviews(
             background, 
+            astroPicTitle,
             Clock.face,
             metaTicker,
             weatherTicker,
@@ -47,10 +64,13 @@ type RadioClockViewController() =
             newsTicker2,
             placeHolder1,
             placeHolder2,
+            placeHolder3,
+            placeHolder4,
             Alarm.StatusBar
         )
 
         let views = [
+            "astroPicTitle",    astroPicTitle   :> UIView
             "alarmStatus",      Alarm.StatusBar
             "weatherTicker",    weatherTicker   :> UIView
             "metaTicker",       metaTicker      :> UIView 
@@ -59,20 +79,23 @@ type RadioClockViewController() =
             "clock",            Clock.face 
             "place1",           placeHolder1    :> UIView 
             "place2",           placeHolder2    :> UIView 
+            "place3",           placeHolder3    :> UIView 
+            "place4",           placeHolder4    :> UIView 
             "back",             background      :> UIView
         ]
 
         let formats = [
             "H:|[back]|"
             "H:|[weatherTicker]|"
-            "H:|-150-[clock]-150-|"
+            "H:|[astroPicTitle]|"
+            "H:|[place3][clock(600)][place4(==place3)]|"
             "H:|[metaTicker]|"
             "H:|[newsTicker1]|"
             "H:|[newsTicker2]|"
             "H:[alarmStatus]-30-|"
             "V:|[back]|"
             "V:|-30-[alarmStatus(50)]"
-            "V:|-30-[weatherTicker(50)][place1][clock(200)][place2(==place1)][metaTicker(50)][newsTicker1(50)][newsTicker2(50)]-20-|"
+            "V:|-30-[weatherTicker(50)][astroPicTitle][place1][clock(200)][place2(==place1)][metaTicker(50)][newsTicker1(50)][newsTicker2(50)]-20-|"
           ]
        
         Layout.layout2 this.View formats views // TOOD: figure out why layout doesn't work (doesn't add views??)
