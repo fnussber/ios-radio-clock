@@ -1,6 +1,7 @@
 ﻿namespace RadioClock
 
 open System
+open System.Collections.Generic
 open System.IO
 open System.Net
 open System.Text
@@ -52,12 +53,12 @@ module WeatherStation =
     /// Gets the icon for the given weather id
     let iconForId name = defaultArg (icons.TryFind name) unknownIcon
 
-    let getWeather() =
+    let getWeather(): option<XmlDocument> =
         try 
-            let lat = if (locationManager.Location = null) then 0.0 else locationManager.Location.Coordinate.Latitude
+            let lat  = if (locationManager.Location = null) then 0.0 else locationManager.Location.Coordinate.Latitude
             let long = if (locationManager.Location = null) then 0.0 else locationManager.Location.Coordinate.Longitude
-            let url = sprintf "http://api.openweathermap.org/data/2.5/forecast/daily?lat=%f&lon=%f&mode=xml&units=metric&cnt=1" lat long
-            let req = HttpWebRequest.Create(url) :?> HttpWebRequest
+            let url  = sprintf "http://api.openweathermap.org/data/2.5/forecast/daily?lat=%f&lon=%f&mode=xml&units=metric&cnt=1" lat long
+            let req  = HttpWebRequest.Create(url) :?> HttpWebRequest
             let resp = req.GetResponse() // throws 501.. etc -> ERROR HANDLING!!!
             let stream = resp.GetResponseStream()
             let reader = new StreamReader(stream)
@@ -66,9 +67,7 @@ module WeatherStation =
             doc.LoadXml xml
             Some(doc)
         with
-            // in case something goes wrong catch the error and turn it into an label
-            | e -> None //new UILabel(Text = e.Message, TranslatesAutoresizingMaskIntoConstraints = false, TextColor = UIColor.White) :> UIView
-
+            | e -> None
 
     let value (xml: XmlDocument, value: string, attribute: string) = (xml.SelectSingleNode("/weatherdata/forecast/time/" + value + "/@" + attribute)).InnerText
 
@@ -102,45 +101,38 @@ module WeatherStation =
                 let label = weatherLabel city (cur.ToString()) (min.ToString()) (max.ToString())
                 icon.TranslatesAutoresizingMaskIntoConstraints <- false
                 label.TranslatesAutoresizingMaskIntoConstraints <- false
-                v.AddSubview(icon)
-                v.AddSubview(label)
 
-                // layout
-                let metrics = new NSDictionary()
-                let views = new NSDictionary("icon", icon, "label", label)
-                let ch0 = NSLayoutConstraint.FromVisualFormat("H:|[icon(50)]-10-[label]|", NSLayoutFormatOptions.DirectionLeadingToTrailing, metrics, views) 
-                let cv0 = NSLayoutConstraint.FromVisualFormat("V:|[icon]|", NSLayoutFormatOptions.DirectionLeadingToTrailing, metrics, views) 
-                let cv1 = NSLayoutConstraint.FromVisualFormat("V:|[label]|", NSLayoutFormatOptions.DirectionLeadingToTrailing, metrics, views) 
-                v.AddConstraints(ch0)
-                v.AddConstraints(cv0)
-                v.AddConstraints(cv1)
+                let views = [
+                    "icon",  icon  :> UIView
+                    "label", label :> UIView
+                ]
+                let formats = [
+                    "H:|[icon(50)]-10-[label]|"
+                    "V:|[icon]|"
+                    "V:|[label]|"         
+                ]
+                Layout.layout v formats views
+
                 v
             | None ->
                 new UILabel(Text = "Couldn't read", TranslatesAutoresizingMaskIntoConstraints = false, TextColor = UIColor.White) :> UIView
 
-//    let weather(): seq<UIView> =
-//        Seq.unfold(fun weather -> Some(weather, weatherView())) (weatherView()) // produce a weather view over and over again, this will in fact reload everytime latest weather info
+    let weatherSeq() : seq<option<XmlDocument>> = 
+        Seq.unfold(fun _ -> Some(getWeather(), [])) []
 
     do
-        // need to ask for iOS 8
-        //if (UIDevice.CurrentDevice.CheckSystemVersion(8, 0)) then locationManager.RequestWhenInUseAuthorization()
-
         // NOTE: there must be a corresponding entry for NSLocationWhenInUseUsageDescription in Info.plist 
         // otherwise iOS will never ask permission and no location updates are generated.
         locationManager.RequestWhenInUseAuthorization()
-//        locationManager.UpdatedLocation |> Event.add(fun evArgs -> Console.WriteLine("NEW POSITION"))
         locationManager.StartUpdatingLocation()
 
-        // update first time, TOOD: do in background?, this will block
-//        locationManager.InvokeOnMainThread(fun _ -> NextWeather.Trigger(weatherView()))
-
-        let timer = new System.Timers.Timer(10000.0) // update every 5 minutes
-        timer.Elapsed.Add(fun _ -> 
-            System.Console.WriteLine(" --  Updating weather information --")
-            let xml = getWeather()                          // access rss feed on separate thread
-            locationManager.InvokeOnMainThread(fun _ ->     
-                NextWeather.Trigger(weatherView xml)        // do only UI stuff on main thread!
-            )
-        )
-        timer.Start()
-         
+        Async.Start (async {
+            let weather = weatherSeq().GetEnumerator()
+            while true do
+                if (weather.MoveNext()) then 
+                    locationManager.InvokeOnMainThread(fun _ ->
+                        NextWeather.Trigger (weatherView(weather.Current))
+                    )
+                do! Async.Sleep 10000
+        }) |> ignore
+                 

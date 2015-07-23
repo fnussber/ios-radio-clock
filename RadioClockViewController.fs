@@ -75,7 +75,7 @@ type RadioClockViewController() =
             "V:|-30-[weatherTicker(50)][place1][clock(200)][place2(==place1)][metaTicker(50)][newsTicker1(50)][newsTicker2(50)]-20-|"
           ]
        
-        Layout.layout2 this.View formats views
+        Layout.layout2 this.View formats views // TOOD: figure out why layout doesn't work (doesn't add views??)
 
     // Return true for supported orientations
     override this.ShouldAutorotateToInterfaceOrientation(orientation) = true

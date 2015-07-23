@@ -21,11 +21,11 @@ module AstroPics =
     let NextPicture  = nextPictureEvent.Publish
 
     /// Downloads a picture from the given URL
-    let downloadPicture (ttitle: String) (url: String) : option<AstroPic> = 
+    let downloadPicture picTitle picUrl : option<AstroPic> = 
         try
             use webClient = new WebClient()    
-            let bytes     = webClient.DownloadData(new Uri(url))
-            Some({title=ttitle; image=new UIImage(NSData.FromArray(bytes))})
+            let bytes     = webClient.DownloadData(new Uri(picUrl))
+            Some( {title = picTitle; image = new UIImage(NSData.FromArray(bytes))} )
         with
             | _ -> None
 
