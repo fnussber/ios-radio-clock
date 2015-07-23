@@ -140,3 +140,6 @@ module Clock =
             stopUserAlarm()
         )
 
+        // start timer
+        start()
+

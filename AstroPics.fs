@@ -7,19 +7,16 @@ open MonoTouch.UIKit
 open MonoTouch.Foundation
 
 /// Provides an endless stream of background images.
-/// The images are taken from an rss feed which contains url links the most recent astronomy pictures
-/// of the day in the description of the new items. See also http://apod.nasa.gov/apod/astropix.html.
-type AstroPics(view: UIImageView) =
+/// The images are taken from an RSS feed which contains URL links to the most recent astronomy pictures
+/// of the day in the description of the news items. See also http://apod.nasa.gov/apod/astropix.html.
+module AstroPics =
+
+    let private nextPictureEvent   = new Event<UIImage>()
 
     let AstroRssFeed = "http://www.acme.com/jef/apod/rss.xml"
+    let NextPicture  = nextPictureEvent.Publish
 
-    /// Displays an image in the background.
-    let updatePicture (img: UIImage) : Unit =
-        view.InvokeOnMainThread(fun _ ->
-            UIView.Transition(view, 3.0, UIViewAnimationOptions.TransitionCrossDissolve, (fun _ -> view.Image <- img), null)
-        )
-
-    /// Downloads a picture.
+    /// Downloads a picture from the given URL
     let nextPicture (url: String) : option<UIImage> = 
         try
             use webClient = new WebClient()    
@@ -28,19 +25,19 @@ type AstroPics(view: UIImageView) =
         with
             | _ -> None
 
-    /// Gets a single image url from the given string. 
+    /// Gets a single image URL from the given string. 
     let urlFromDesc (input: string) : list<string> =
         let m = Regex.Match(input, "img src=\"([^\"]*)") 
         // group 0 is the whole matched expression, first group is 1
         if (m.Success) then [m.Groups.Item(1).Value] else [] 
 
-    /// Gets a batch of background image urls from the items in an RSS feed.
+    /// Gets a batch of background image URLs from the items in an RSS feed.
     let nextUrls () : list<string> =   
-        let items = RssFeed.items(AstroRssFeed)
+        let items = RssFeed.items AstroRssFeed
         List.map (fun i -> urlFromDesc(i.desc)) items 
         |> List.concat // flatten list in case regexp didn't match
 
-    /// Creates an endless sequence of background image urls.
+    /// Creates an endless sequence of background image URLs.
     let imageUrlSeq : seq<option<string>> =
         Seq.unfold (fun urls ->
             match urls with                                 // consume current batch of urls
@@ -60,14 +57,16 @@ type AstroPics(view: UIImageView) =
                 | None   -> None
         ) imageUrlSeq
 
+    /// Initialise the module, start producing images.
     do
+        // provide images as a background task and trigger an event when next one is available
         Async.Start (async {
             let images = imageSeq.GetEnumerator()
             while true do
                 if (images.MoveNext()) then
                     match images.Current with
-                        | Some i -> updatePicture(i)
-                        | None   -> ()
+                        | Some img -> nextPictureEvent.Trigger img
+                        | None     -> ()
                 do! Async.Sleep 10000
         }) |> ignore
 

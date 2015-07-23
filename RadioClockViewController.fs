@@ -9,6 +9,17 @@ open MonoTouch.Foundation
 type RadioClockViewController() = 
     inherit UIViewController()
 
+    let background = new UIImageView(TranslatesAutoresizingMaskIntoConstraints = false, BackgroundColor = UIColor.Black)
+
+    let updateBackground (img: UIImage) : Unit = 
+        background.InvokeOnMainThread(fun _ ->
+            UIView.Transition(background, 3.0, UIViewAnimationOptions.TransitionCrossDissolve, (fun _ -> background.Image <- img), null)
+        )
+
+    do 
+        // install handler for background updates
+        AstroPics.NextPicture.Add(fun img -> updateBackground img)
+
     // Release any cached data, images, etc that aren't in use.
     override this.DidReceiveMemoryWarning() =
         System.Console.WriteLine("Received memory warning") 
@@ -18,15 +29,12 @@ type RadioClockViewController() =
     override this.ViewDidLoad() = 
         base.ViewDidLoad()  
 
-        let alarmStatus   = Alarm.StatusBar() //new UIView(TranslatesAutoresizingMaskIntoConstraints = false)
         let metaTicker    = new Ticker(Radio.NextMetadata, 0.5, 0.5)
         let newsTicker1   = new Ticker(NewsStation.NextHeadline, 0.5, 0.5)
         let newsTicker2   = new Ticker(NewsStation.NextDescription, 1.0, 6.0)
         let weatherTicker = new Ticker(WeatherStation.NextWeather, 0.0, 0.0)
-        let placeHolder1  = new UILabel(TranslatesAutoresizingMaskIntoConstraints = false) // simpler way for place holder?
+        let placeHolder1  = new UILabel(TranslatesAutoresizingMaskIntoConstraints = false)
         let placeHolder2  = new UILabel(TranslatesAutoresizingMaskIntoConstraints = false)
-        let background    = new UIImageView(TranslatesAutoresizingMaskIntoConstraints = false, BackgroundColor = UIColor.Black)
-        let astroPics     = new AstroPics(background)
 
         this.SetToolbarItems(Toolbar.toolbarItems(this), true)
 
@@ -39,11 +47,11 @@ type RadioClockViewController() =
             newsTicker2,
             placeHolder1,
             placeHolder2,
-            alarmStatus
+            Alarm.StatusBar
         )
 
         let views = [
-            "alarmStatus",      alarmStatus
+            "alarmStatus",      Alarm.StatusBar
             "weatherTicker",    weatherTicker   :> UIView
             "metaTicker",       metaTicker      :> UIView 
             "newsTicker1",      newsTicker1     :> UIView
@@ -66,11 +74,8 @@ type RadioClockViewController() =
             "V:|-30-[alarmStatus(50)]"
             "V:|-30-[weatherTicker(50)][place1][clock(200)][place2(==place1)][metaTicker(50)][newsTicker1(50)][newsTicker2(50)]-20-|"
           ]
-
        
         Layout.layout2 this.View formats views
-
-        Clock.start()
 
     // Return true for supported orientations
     override this.ShouldAutorotateToInterfaceOrientation(orientation) = true
@@ -88,5 +93,6 @@ type RadioClockViewController() =
     override this.ViewWillAppear(animated) =
         base.ViewWillAppear(animated)
         this.NavigationController.NavigationBarHidden <- true
+
 
 

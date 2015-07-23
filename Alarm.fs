@@ -17,7 +17,7 @@ module Alarm =
     let alarmLbl = Layout.coloredText "" UIColor.White
     let alarmRem = Layout.coloredText "" UIColor.White
 
-    let StatusBar (): UIView =
+    let StatusBar : UIView =
         let view = new UIView(TranslatesAutoresizingMaskIntoConstraints = false)
 
         let views = [
