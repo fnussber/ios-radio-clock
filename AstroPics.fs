@@ -35,10 +35,14 @@ module AstroPics =
         // group 0 is the whole matched expression, first group is 1
         if (m.Success) then Some (m.Groups.Item(1).Value) else None 
 
+    /// Gets the title from the head of the news item and cleans it a bit.
+    let titleFromNewsItem (news: NewsItem) : string =
+        news.head.Replace("</b>", "").Replace("<br>", "").Trim()
+
     /// Gets the title and the URL of the picture represented by this news item.
     let titleAndUrlFromNewsItem (news: NewsItem) : option<string * string> =
         match urlFromNewsItem news with
-            | Some (url)-> Some (news.head, url)
+            | Some (url)-> Some (titleFromNewsItem(news), url)
             | None     ->  None
 
     /// Creates an endless sequence of background images based on the news feed.

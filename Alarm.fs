@@ -32,8 +32,8 @@ module Alarm =
             "V:|[sleepLbl]|"
             "V:|[alarmIco]"
             "V:|[alarmLbl][alarmRem]|"
-            "H:|[sleepIco]-[sleepLbl(100)]-[alarmIco]-[alarmLbl(100)]|"
-            "H:[alarmRem(100)]|"
+            "H:|[sleepIco]-[sleepLbl]-[alarmIco]-[alarmLbl]|"
+            "H:[alarmRem]|"
         ]
         Layout.layout view formats views
         
@@ -41,12 +41,8 @@ module Alarm =
 
     let cancelNotification maybeNotification =
         match maybeNotification with
-            | Some n -> 
-                UIApplication.SharedApplication.CancelLocalNotification(n)
-//                if (timer.IsNone && alarm.IsNone) then
-//                    UIApplication.SharedApplication.IdleTimerDisabled <- false
-            | None   ->
-                ()
+            | Some n -> UIApplication.SharedApplication.CancelLocalNotification(n)
+            | None   -> ()
 
     let cancelAlarm () =
         cancelNotification alarm
@@ -63,10 +59,8 @@ module Alarm =
 
     let createNotification nsdate =
         let notif  = new UILocalNotification(FireDate = nsdate)
-//        notif.FireDate <- nsdate
         notif.AlertAction <- "Wecki, wecki"
         notif.AlertBody <- "Hey, an alert went off"
-//        UIApplication.SharedApplication.IdleTimerDisabled <- true
         UIApplication.SharedApplication.ScheduleLocalNotification(notif)
         notif
 

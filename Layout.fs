@@ -7,7 +7,7 @@ module Layout =
 
     let bigFont   = UIFont.FromName("Helvetica-Bold", 100.0f)
     let smallFont = UIFont.FromName("Helvetica-Bold", 20.0f)
-    let TinyFont  = UIFont.FromName("Helvetica", 15.0f)
+    let TinyFont  = UIFont.FromName("Helvetica",      15.0f)
 
     // https://icons8.com/web-app/for/ios7
     let SleepIcon   = "timer-32.png"
@@ -40,8 +40,12 @@ module Layout =
             Font = font,
             TextColor = UIColor.White,
             BackgroundColor = UIColor.Clear,
-            TextAlignment = UITextAlignment.Center,
             TranslatesAutoresizingMaskIntoConstraints = false)
+
+    let centeredLabel str font =
+        let l = label str font
+        l.TextAlignment <- UITextAlignment.Center
+        l
 
     let icon (str: string) =
         let img  = new UIImage(str)

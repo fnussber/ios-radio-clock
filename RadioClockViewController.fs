@@ -15,7 +15,7 @@ type RadioClockViewController() =
             BackgroundColor = UIColor.Black, 
             ContentMode = UIViewContentMode.ScaleAspectFill)
 
-    let astroPicTitle = Layout.label "" Layout.smallFont
+    let astroPicTitle = Layout.centeredLabel "" Layout.smallFont
 
     let updateBackground (img: UIImage) : Unit = 
         background.InvokeOnMainThread(fun _ ->
@@ -24,7 +24,7 @@ type RadioClockViewController() =
 
     let updateTitle title : Unit = 
         background.InvokeOnMainThread(fun _ ->
-                astroPicTitle.Text <- title
+            UIView.Transition(astroPicTitle, 3.0, UIViewAnimationOptions.TransitionCrossDissolve, (fun _ -> astroPicTitle.Text <- title), null)
         )
 
     do 
@@ -94,8 +94,8 @@ type RadioClockViewController() =
             "H:|[newsTicker2]|"
             "H:[alarmStatus]-30-|"
             "V:|[back]|"
-            "V:|-30-[alarmStatus(50)]"
-            "V:|-30-[weatherTicker(50)][astroPicTitle][place1][clock(200)][place2(==place1)][metaTicker(50)][newsTicker1(50)][newsTicker2(50)]-20-|"
+            "V:|-30-[alarmStatus]"
+            "V:|-30-[weatherTicker(50)]-[astroPicTitle][place1][clock(200)][place2(==place1)][metaTicker(50)][newsTicker1(50)][newsTicker2(50)]-20-|"
           ]
        
         Layout.layout2 this.View formats views // TOOD: figure out why layout doesn't work (doesn't add views??)

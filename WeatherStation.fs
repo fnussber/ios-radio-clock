@@ -83,12 +83,9 @@ module WeatherStation =
     let location(xml: XmlDocument): string = (xml.SelectSingleNode("/weatherdata/location/name")).InnerText
 
     let weatherLabel city temp minTemp maxTemp = 
-        new UILabel(
-            Text = (city + "   " + temp + "°  ↓" + minTemp + "° ↑" + maxTemp + "°"), 
-            TranslatesAutoresizingMaskIntoConstraints = false, 
-            TextColor = UIColor.White)
-
-
+        Layout.label
+            (city + " " + temp + "° ↓" + minTemp + "° ↑" + maxTemp + "°") 
+            Layout.TinyFont
 
     let weatherView xml =
         match xml with
