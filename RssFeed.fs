@@ -36,4 +36,15 @@ module RssFeed =
             // in case something goes wrong catch the error and turn it into a news item
             | e -> [{ head = "Could not read rss feed " + url; desc = e.Message; }]
            
+    let newsSeq (url: string) : seq<NewsItem> =
+        Seq.unfold(fun its ->
+            match its with                                 // consume current batch of urls
+                | n::ns -> 
+                    Some(Some(n), ns)
+                | []    ->
+                   match items url with                    // once we run out, load a fresh batch of urls
+                    | n::ns -> Some(Some(n), ns)
+                    | []    -> Some(None,   items(url))     // (fresh batch can be empty in case of an error)
+        ) []
+        |> Seq.choose id
 

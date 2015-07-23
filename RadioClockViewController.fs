@@ -18,7 +18,7 @@ type RadioClockViewController() =
 
     do 
         // install handler for background updates
-        AstroPics.NextPicture.Add(fun img -> updateBackground img)
+        AstroPics.NextPicture.Add(fun pic -> updateBackground pic.image)
 
     // Release any cached data, images, etc that aren't in use.
     override this.DidReceiveMemoryWarning() =
