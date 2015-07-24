@@ -3,6 +3,7 @@
 open System
 open MonoTouch.UIKit
 open MonoTouch.Foundation
+open MonoTouch.AVFoundation
 
 [<Register("AppDelegate")>]
 type AppDelegate() = 
@@ -10,9 +11,12 @@ type AppDelegate() =
 
     do
         NSNotificationCenter.DefaultCenter.AddObserver(UIApplication.DidBecomeActiveNotification, fun _ ->
-            Console.WriteLine("disabling idle timer")
             UIApplication.SharedApplication.IdleTimerDisabled <- true
         ) |> ignore
+
+        // this will keep audio playing when app is in the background
+        AVAudioSession.SharedInstance().SetCategory(new NSString("AVAudioSessionCategoryPlayback")) |> ignore
+
 
     member val Window = null with get, set
 
@@ -27,7 +31,7 @@ type AppDelegate() =
         true
 
     override this.ReceivedLocalNotification(app, notification) =
-        Console.WriteLine("RECEIVED LOCAL NOTIFICATION! - WE WERE IN FOREGROUND")
+        // Note: notifications will only be received if application is in the foreground!
         Alarm.handleNotification notification
 
 

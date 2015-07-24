@@ -130,6 +130,7 @@ module WeatherStation =
                     locationManager.InvokeOnMainThread(fun _ ->
                         NextWeather.Trigger (weatherView(weather.Current))
                     )
-                do! Async.Sleep 10000
+                // update weather information once a minute
+                do! Async.Sleep 60000 
         }) |> ignore
                  

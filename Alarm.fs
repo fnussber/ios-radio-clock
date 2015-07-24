@@ -59,8 +59,9 @@ module Alarm =
 
     let createNotification nsdate =
         let notif  = new UILocalNotification(FireDate = nsdate)
-        notif.AlertAction <- "Wecki, wecki"
-        notif.AlertBody <- "Hey, an alert went off"
+        notif.AlertAction <- "Alarm Clock"
+        notif.AlertBody   <- "A timer or an alarm went off. But alarm clock is in background."
+        notif.SoundName   <- "Beacon"
         UIApplication.SharedApplication.ScheduleLocalNotification(notif)
         notif
 
@@ -104,7 +105,6 @@ module Alarm =
 
     // Handle incoming system notifications
     let handleNotification (incoming: UILocalNotification) =
-//        UIApplication.SharedApplication.IdleTimerDisabled <- false
         if (alarm.IsSome && alarm.Value.FireDate.IsEqual(incoming.FireDate)) then 
             cancelAlarm()
             Radio.fadeIn()
