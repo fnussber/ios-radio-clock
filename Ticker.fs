@@ -7,7 +7,7 @@ open MonoTouch.CoreGraphics
 open MonoTouch.Foundation
 open MonoTouch.UIKit
 
-type Ticker(event: Event<UIView>, inSpeed: float, outSpeed: float) as this = 
+type Ticker(event: Event<UIView>, inSpeed: float) as this = 
     inherit UIView(
         TranslatesAutoresizingMaskIntoConstraints = false,
         BackgroundColor = new UIColor(0.0f, 0.0f, 0.0f, 0.3f)

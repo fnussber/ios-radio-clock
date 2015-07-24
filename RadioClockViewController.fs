@@ -15,10 +15,10 @@ type RadioClockViewController() =
             BackgroundColor = UIColor.Black, 
             ContentMode = UIViewContentMode.ScaleAspectFill)
 
-    let metaTicker    = new Ticker(Radio.NextMetadata, 0.5, 0.5)
-    let newsTicker1   = new Ticker(NewsStation.NextHeadline, 0.5, 0.5)
-    let newsTicker2   = new Ticker(NewsStation.NextDescription, 1.0, 6.0)
-    let weatherTicker = new Ticker(WeatherStation.NextWeather, 0.0, 0.0)
+    let metaTicker    = new Ticker(Radio.NextMetadata, 0.5)
+    let newsTicker1   = new Ticker(NewsStation.NextHeadline, 0.5)
+    let newsTicker2   = new Ticker(NewsStation.NextDescription, 1.0)
+    let weatherTicker = new Ticker(WeatherStation.NextWeather, 0.0)
     let astroPicTitle = Layout.centeredLabel "" Layout.smallFont
     let placeHolder1  = Layout.label "" Layout.smallFont
     let placeHolder2  = Layout.label "" Layout.smallFont
