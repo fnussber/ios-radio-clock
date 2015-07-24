@@ -21,6 +21,8 @@ type Observer(event: Event<UIView>) =
 module Radio = 
 
     let NextMetadata = new Event<UIView>()
+    let TurnOn       = new Event<string>()
+    let TurnOff      = new Event<string>()
 
     let private observer = new Observer(NextMetadata) // simpler way to do this using delegates?
 
@@ -48,6 +50,7 @@ module Radio =
         let avplayer = new AVPlayer(item)
         avplayer.Play()
         player <- Some(avplayer)
+        TurnOn.Trigger ""
 
     let Stop() =
         match player with
@@ -56,6 +59,7 @@ module Radio =
                 p.Pause()
                 p.CurrentItem.RemoveObserver(observer, "timedMetadata")
                 p.Dispose()
+                TurnOff.Trigger ""
             | None -> 
                 ()
 
@@ -92,5 +96,9 @@ module Radio =
         Toolbar.stationButton.Add (fun s ->
             Stop()
             Play(s)
+        )
+
+        Toolbar.timerButton.Add (fun _ ->
+            if (not(IsPlaying())) then Play(Config.stations.Head)
         )
 

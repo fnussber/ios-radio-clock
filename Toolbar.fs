@@ -6,13 +6,13 @@ open MonoTouch.Foundation
 
 module Toolbar =
 
-    let private timerEvent   = new Event<option<TimeSpan>>()
-    let private alarmEvent   = new Event<option<TimeSpan>>()
-    let private stationEvent = new Event<Station>()
-    let private usralEvent   = new Event<string>()
-    let private radioEvent   = new Event<string>()
-    let private nightModeEvent   = new Event<string>()
-    let private dayModeEvent   = new Event<string>()
+    let private timerEvent      = new Event<option<TimeSpan>>()
+    let private alarmEvent      = new Event<option<TimeSpan>>()
+    let private stationEvent    = new Event<Station>()
+    let private usralEvent      = new Event<string>()
+    let private radioEvent      = new Event<string>()
+    let private nightModeEvent  = new Event<string>()
+    let private dayModeEvent    = new Event<string>()
 
     let timerButton         = timerEvent.Publish
     let alarmButton         = alarmEvent.Publish
@@ -59,13 +59,13 @@ module Toolbar =
 
     let toolbarItems (ctrl: UIViewController)  = 
         // hide toolbar when any of the buttons/menu actions has been selected (i.e. an even fired)
-        timerButton.Add  (fun _ -> ctrl.NavigationController.ToolbarHidden <- true)
-        alarmButton.Add  (fun _ -> ctrl.NavigationController.ToolbarHidden <- true)
-        stationButton.Add(fun _ -> ctrl.NavigationController.ToolbarHidden <- true)
-        radioButton.Add  (fun _ -> ctrl.NavigationController.ToolbarHidden <- true)
-        userAlarmCreate.Add  (fun _ -> ctrl.NavigationController.ToolbarHidden <- true)
-        nightModeSelected.Add  (fun _ -> ctrl.NavigationController.ToolbarHidden <- true)
-        dayModeSelected.Add  (fun _ -> ctrl.NavigationController.ToolbarHidden <- true)
+        timerButton.Add         (fun _ -> ctrl.NavigationController.ToolbarHidden <- true)
+        alarmButton.Add         (fun _ -> ctrl.NavigationController.ToolbarHidden <- true)
+        stationButton.Add       (fun _ -> ctrl.NavigationController.ToolbarHidden <- true)
+        radioButton.Add         (fun _ -> ctrl.NavigationController.ToolbarHidden <- true)
+        userAlarmCreate.Add     (fun _ -> ctrl.NavigationController.ToolbarHidden <- true)
+        nightModeSelected.Add   (fun _ -> ctrl.NavigationController.ToolbarHidden <- true)
+        dayModeSelected.Add     (fun _ -> ctrl.NavigationController.ToolbarHidden <- true)
 
         // create toolbar buttons, note that the menus are created "on-the-fly", i.e. they
         // will reflect changes to the underlying data that represents the selectable items

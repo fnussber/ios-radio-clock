@@ -29,11 +29,11 @@ type Digit(digit: String) as self =
 //        )
 
     do
-        self.TranslatesAutoresizingMaskIntoConstraints <- false  // important for auto layout!
+        self.TranslatesAutoresizingMaskIntoConstraints <- false
         self.Font <- Layout.bigFont
         self.Text <- digit
         self.TextAlignment <- UITextAlignment.Center
-        self.BackgroundColor <- UIColor.Clear// new UIColor(float32(random.NextDouble()), 0.0f, 0.0f, 0.5f)
+        self.BackgroundColor <- UIColor.Clear
         self.TextColor <- UIColor.White
 
     member this.Blink() =
@@ -41,9 +41,8 @@ type Digit(digit: String) as self =
         let scaleAnim = CABasicAnimation.FromKeyPath("transform.scale")
         scaleAnim.TimingFunction <- CAMediaTimingFunction.FromName(CAMediaTimingFunction.EaseInEaseOut)
         scaleAnim.Duration <- 0.5
-        scaleAnim.RepeatCount <- 1000.0f // howto: Endless repeat?
+        scaleAnim.RepeatCount <- 1000.0f
         scaleAnim.AutoReverses <- true
-        //scaleAnim.RemovedOnCompletion <- true
         scaleAnim.To <- NSNumber.FromDouble(1.5)
         self.Layer.AddAnimation(scaleAnim, "blinkAnim")
 
@@ -57,25 +56,21 @@ type Digit(digit: String) as self =
         let rotAnim = CABasicAnimation.FromKeyPath("transform.rotation")
         rotAnim.TimingFunction <- CAMediaTimingFunction.FromName(CAMediaTimingFunction.EaseInEaseOut)
         rotAnim.Duration <- 1.0
-        //rotAnim.RepeatCount <- 8.0f
         rotAnim.AutoReverses <- false
-        //rotAnim.RemovedOnCompletion <- true
         rotAnim.From <- NSNumber.FromDouble(Math.PI/2.0)
         rotAnim.To <- NSNumber.FromDouble(0.0)
         self.Layer.AddAnimation(rotAnim, "rotAnim")
 
         // --- animate along curve
         let path = new UIBezierPath()
-        let dx = float32((random.Next() % 800) - 400) // -300.0f
-        let dy = float32((random.Next() % 500) - 250) // +200.0f
+        let dx = float32((random.Next() % 800) - 400)
+        let dy = float32((random.Next() % 500) - 250)
         path.MoveTo(new PointF(this.Center.X + dx, this.Center.Y + dy))
         path.AddQuadCurveToPoint(this.Center, new PointF(this.Center.X, this.Center.Y + dy))
         let anim = CAKeyFrameAnimation.GetFromKeyPath("position")
         anim.Duration <- 1.0
         anim.Path <- path.CGPath
         anim.TimingFunction <- CAMediaTimingFunction.FromName(CAMediaTimingFunction.EaseOut)
-        //anim.RotationMode <- CAKeyFrameAnimation.RotateModeAuto.ToString()
-        //anim.RemovedOnCompletion <- true
         self.Layer.AddAnimation(anim, "moveAnim")
 
         // --- fade in
@@ -91,7 +86,6 @@ type Digit(digit: String) as self =
         scaleAnim.Duration <- 0.25
         scaleAnim.RepeatCount <- 1.0f
         scaleAnim.AutoReverses <- true
-        //scaleAnim.RemovedOnCompletion <- true
         scaleAnim.To <- NSNumber.FromDouble(1.8)
         self.Layer.AddAnimation(scaleAnim, "scaleAnim")
 
@@ -125,7 +119,6 @@ type Digit(digit: String) as self =
         UIView.Animate(0.9, 0.0, UIViewAnimationOptions.CurveEaseOut, (fun () -> self.Alpha <- 0.0f), null)
 
 
-//[<AbstractClass>]
 type Digit2 (up: NSAction, down: NSAction) as this =
     inherit UIView()
 
@@ -134,19 +127,20 @@ type Digit2 (up: NSAction, down: NSAction) as this =
     let label1 = new Digit(d.ToString())
 
     do
+
         this.TranslatesAutoresizingMaskIntoConstraints <- false  // important for auto layout!
-        this.AddSubview(label0)
-        this.AddSubview(label1)
-        let metrics = new NSDictionary()
-        let views = new NSDictionary("l0", label0, "l1", label1)
-        let ch0 = NSLayoutConstraint.FromVisualFormat("H:|[l0]|", NSLayoutFormatOptions.DirectionLeadingToTrailing, metrics, views) 
-        let ch1 = NSLayoutConstraint.FromVisualFormat("H:|[l1]|", NSLayoutFormatOptions.DirectionLeadingToTrailing, metrics, views) 
-        let cv0 = NSLayoutConstraint.FromVisualFormat("V:|[l0]|", NSLayoutFormatOptions.DirectionLeadingToTrailing, metrics, views) 
-        let cv1 = NSLayoutConstraint.FromVisualFormat("V:|[l1]|", NSLayoutFormatOptions.DirectionLeadingToTrailing, metrics, views) 
-        this.AddConstraints(ch0)
-        this.AddConstraints(ch1)
-        this.AddConstraints(cv0)
-        this.AddConstraints(cv1)
+
+        let views = [
+            "l0", label0 :> UIView
+            "l1", label1 :> UIView
+        ]
+        let formats = [
+            "H:|[l0]|"
+            "H:|[l1]|"
+            "V:|[l0]|"
+            "V:|[l1]|"
+        ]
+        Layout.layout this formats views
 
         let swipeUp = new UISwipeGestureRecognizer(up)
         swipeUp.Direction <- UISwipeGestureRecognizerDirection.Up 
@@ -161,8 +155,6 @@ type Digit2 (up: NSAction, down: NSAction) as this =
         this.AddGestureRecognizer(swipeLeft)
         this.AddGestureRecognizer(swipeRight)
 
-
-//    abstract Bgc: unit -> UIColor
 
     member this.Digit = d
     member this.Label0 = label0
@@ -184,7 +176,7 @@ type Digit2 (up: NSAction, down: NSAction) as this =
                 )
             )
 
-//[<AbstractClass>]
+
 type TwoDigits(maxValue: int) as this =
     inherit UIView()
 
@@ -196,7 +188,7 @@ type TwoDigits(maxValue: int) as this =
 
 
     do
-        this.TranslatesAutoresizingMaskIntoConstraints <- false  // important for auto layout!
+        this.TranslatesAutoresizingMaskIntoConstraints <- false
 
         let views = [
             "d0", d0 :> UIView

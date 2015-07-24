@@ -30,11 +30,14 @@ type Ticker(event: Event<UIView>, inSpeed: float, outSpeed: float) as this =
         message.RemoveFromSuperview()
         message.Dispose() // TODO: needed??
         message <- msg
-        this.AddSubview(message)
-        let metrics = new NSDictionary()
-        let views = new NSDictionary("m", message)
-        let h = NSLayoutConstraint.FromVisualFormat("H:|-20-[m]-20-|", NSLayoutFormatOptions.DirectionLeadingToTrailing, metrics, views) 
-        let v = NSLayoutConstraint.FromVisualFormat("V:|[m]|", NSLayoutFormatOptions.DirectionLeadingToTrailing, metrics, views) 
-        this.AddConstraints(h)
-        this.AddConstraints(v)
+
+        let views = [
+            "m", message
+        ]
+        let formats = [
+            "H:|-20-[m]-20-|"
+            "V:|[m]|"
+        ]
+        Layout.layout this formats views
+
         scrollIn()

@@ -46,8 +46,8 @@ module AstroPics =
             | None     ->  None
 
     /// Creates an endless sequence of background images based on the news feed.
+    /// (Also filters out any None elements that are the result of errors.)
     let imageSeq : seq<AstroPic> =
-        // a maybe monad would be useful for chaining here..
         RssFeed.newsSeq AstroRssFeed
         |> Seq.map (fun news         -> titleAndUrlFromNewsItem news)
         |> Seq.choose id

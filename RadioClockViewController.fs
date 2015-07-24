@@ -15,24 +15,32 @@ type RadioClockViewController() =
             BackgroundColor = UIColor.Black, 
             ContentMode = UIViewContentMode.ScaleAspectFill)
 
+    let metaTicker    = new Ticker(Radio.NextMetadata, 0.5, 0.5)
+    let newsTicker1   = new Ticker(NewsStation.NextHeadline, 0.5, 0.5)
+    let newsTicker2   = new Ticker(NewsStation.NextDescription, 1.0, 6.0)
+    let weatherTicker = new Ticker(WeatherStation.NextWeather, 0.0, 0.0)
     let astroPicTitle = Layout.centeredLabel "" Layout.smallFont
+    let placeHolder1  = Layout.label "" Layout.smallFont
+    let placeHolder2  = Layout.label "" Layout.smallFont
+    let placeHolder3  = Layout.label "" Layout.smallFont
+    let placeHolder4  = Layout.label "" Layout.smallFont
 
-    let updateBackground (img: UIImage) : Unit = 
+    let updateAstroPic (pic: AstroPic) : Unit = 
         background.InvokeOnMainThread(fun _ ->
-            UIView.Transition(background, 3.0, UIViewAnimationOptions.TransitionCrossDissolve, (fun _ -> background.Image <- img), null)
-        )
-
-    let updateTitle title : Unit = 
-        background.InvokeOnMainThread(fun _ ->
-            UIView.Transition(astroPicTitle, 3.0, UIViewAnimationOptions.TransitionCrossDissolve, (fun _ -> astroPicTitle.Text <- title), null)
+            UIView.Transition(background,    3.0, UIViewAnimationOptions.TransitionCrossDissolve, (fun _ -> background.Image   <- pic.image), null)
+            UIView.Transition(astroPicTitle, 3.0, UIViewAnimationOptions.TransitionCrossDissolve, (fun _ -> astroPicTitle.Text <- pic.title), null)
         )
 
     do 
+        // at startup hide the media player meta information ticker
+        metaTicker.Hidden <- true
+
         // install handler for background updates
-        AstroPics.NextPicture.Add(fun pic -> 
-            updateBackground pic.image
-            updateTitle      pic.title
-        )
+        AstroPics.NextPicture.Add(fun pic -> updateAstroPic pic)
+
+        // turn meta ticker with media information on/off
+        Radio.TurnOn.Publish.Add (fun pic -> metaTicker.Hidden <- false)
+        Radio.TurnOff.Publish.Add(fun pic -> metaTicker.Hidden <- true)
 
     // Release any cached data, images, etc that aren't in use.
     override this.DidReceiveMemoryWarning() =
@@ -43,45 +51,21 @@ type RadioClockViewController() =
     override this.ViewDidLoad() = 
         base.ViewDidLoad()  
 
-        let metaTicker    = new Ticker(Radio.NextMetadata, 0.5, 0.5)
-        let newsTicker1   = new Ticker(NewsStation.NextHeadline, 0.5, 0.5)
-        let newsTicker2   = new Ticker(NewsStation.NextDescription, 1.0, 6.0)
-        let weatherTicker = new Ticker(WeatherStation.NextWeather, 0.0, 0.0)
-        let placeHolder1  = new UILabel(TranslatesAutoresizingMaskIntoConstraints = false)
-        let placeHolder2  = new UILabel(TranslatesAutoresizingMaskIntoConstraints = false)
-        let placeHolder3  = new UILabel(TranslatesAutoresizingMaskIntoConstraints = false)
-        let placeHolder4  = new UILabel(TranslatesAutoresizingMaskIntoConstraints = false)
-
         this.SetToolbarItems(Toolbar.toolbarItems(this), true)
 
-        this.View.AddSubviews(
-            background, 
-            astroPicTitle,
-            Clock.face,
-            metaTicker,
-            weatherTicker,
-            newsTicker1,
-            newsTicker2,
-            placeHolder1,
-            placeHolder2,
-            placeHolder3,
-            placeHolder4,
-            Alarm.StatusBar
-        )
-
         let views = [
+            "back",             background      :> UIView
             "astroPicTitle",    astroPicTitle   :> UIView
-            "alarmStatus",      Alarm.StatusBar
-            "weatherTicker",    weatherTicker   :> UIView
+            "clock",            Clock.face 
             "metaTicker",       metaTicker      :> UIView 
+            "weatherTicker",    weatherTicker   :> UIView
             "newsTicker1",      newsTicker1     :> UIView
             "newsTicker2",      newsTicker2     :> UIView
-            "clock",            Clock.face 
             "place1",           placeHolder1    :> UIView 
             "place2",           placeHolder2    :> UIView 
             "place3",           placeHolder3    :> UIView 
             "place4",           placeHolder4    :> UIView 
-            "back",             background      :> UIView
+            "alarmStatus",      Alarm.StatusBar
         ]
 
         let formats = [
@@ -98,14 +82,13 @@ type RadioClockViewController() =
             "V:|-30-[weatherTicker(50)]-[astroPicTitle][place1][clock(200)][place2(==place1)][metaTicker(50)][newsTicker1(50)][newsTicker2(50)]-20-|"
           ]
        
-        Layout.layout2 this.View formats views // TOOD: figure out why layout doesn't work (doesn't add views??)
+        Layout.layout this.View formats views
 
     // Return true for supported orientations
     override this.ShouldAutorotateToInterfaceOrientation(orientation) = true
 
     override this.WillRotate(orientation, duration) = 
-        Array.ForEach(this.View.Subviews, fun v -> v.SetNeedsLayout(); v.LayoutIfNeeded()) // TODO: how to enforce relayout??
-        //this.View.LayoutIfNeeded()
+        Array.ForEach(this.View.Subviews, fun v -> v.SetNeedsLayout(); v.LayoutIfNeeded())
 
     override this.TouchesBegan(touches, event) =
         // toggle toolbar when user touches screen EXCEPT for the case where the

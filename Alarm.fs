@@ -143,6 +143,10 @@ module Alarm =
             UIScreen.MainScreen.Brightness <- 0.0f
         )
 
+        Radio.TurnOff.Publish.Add (fun _ ->
+            cancelTimer()
+        )
+
         // install a timer that updates the remaining time labels
         let ttt = new System.Timers.Timer(1000.0)
         ttt.Elapsed.Add(fun _ -> 
