@@ -8,25 +8,19 @@ open MonoTouch.Foundation
 open MonoTouch.UIKit
 
 type Ticker(event: Event<UIView>, inSpeed: float, outSpeed: float) as this = 
-    inherit UIView()
+    inherit UIView(
+        TranslatesAutoresizingMaskIntoConstraints = false,
+        BackgroundColor = new UIColor(0.0f, 0.0f, 0.0f, 0.3f)
+    )
 
     let mutable message = new UIView()
 
-//    let scrollOut() =
-//        UIView.Animate(outSpeed, 0.0, UIViewAnimationOptions.CurveLinear, new NSAction(fun () -> message.Center <- new PointF (message.Center.X - 1000.0f, message.Center.Y)), null)
-
-    let scrollIn() =
+    let scrollIn () =
         let center = message.Center
         message.Center <- new PointF (message.Center.X + 1000.0f, message.Center.Y)
         UIView.Animate(inSpeed, 0.0, UIViewAnimationOptions.CurveLinear, (fun () -> message.Center <- center), null)
 
-    do
-        this.TranslatesAutoresizingMaskIntoConstraints <- false  // important for auto layout!
-        this.BackgroundColor <- new UIColor(0.0f, 0.0f, 0.0f, 0.3f)
-        Event.add (fun s -> Console.WriteLine("next"); this.nextMessage(s)) event.Publish
- 
-    member this.nextMessage(msg) =
-//        scrollOut()
+    let nextMessage msg =
         message.RemoveFromSuperview()
         message.Dispose() // TODO: needed??
         message <- msg
@@ -41,3 +35,7 @@ type Ticker(event: Event<UIView>, inSpeed: float, outSpeed: float) as this =
         Layout.layout this formats views
 
         scrollIn()
+
+    do
+        event.Publish.Add (fun s -> nextMessage(s)) 
+ 
