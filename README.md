@@ -8,6 +8,11 @@ Some of the functionality:
 * Plays streaming internet radio 
 * Shows some weather information
 * Sleep timer
+* 
 
-## Disclaimer
-This is meant to be an example application for me to play around with some technologies and in order for it to be generally useful quite a few things are still missing like for example a snooze function, programmable alarm times for different days of the weeks, additional configuration options, like e.g. setting your own radio stations, better handling of alarms if application is in the background etc. etc.
+## Demo Video
+
+See a demo video on youtube: https://youtu.be/qBnyGcEPXgM
+
+## Improvements
+This is an example application to play around with some technologies and in order for it to be generally useful quite a few things are still missing like for example a snooze function, programmable alarm times for different days of the weeks, additional configuration options, like e.g. setting your own radio stations, better handling of alarms if application is in the background etc. etc.
