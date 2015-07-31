@@ -11,10 +11,6 @@ open MonoTouch.CoreGraphics
 open MonoTouch.Foundation
 open MonoTouch.UIKit
 
-// Unfortunately we can't use the tools from FSharp.Data like type providers etc. because including
-// the dll inflates the binary beyond the maximum size allowed for the free Xamarin Studio version :(
-// Credits for weather icons: http://icons8.com/web-app/category/ios7/Weather
-
 /// Simple weather station that uses our current location to get weather information from openweathermap.org
 module WeatherStation =
 

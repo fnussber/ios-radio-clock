@@ -4,8 +4,8 @@ open System
 open MonoTouch.Foundation
 open MonoTouch.UIKit
 
-// Deal with two types of alarms: a sleep timer, which will turn the
-// radio off after a given time, and the actual alarm clock.
+/// Deal with two types of alarms: a sleep timer, which will turn the
+/// radio off after a given time, and the actual alarm clock.
 module Alarm = 
 
     let mutable timer: option<UILocalNotification> = None

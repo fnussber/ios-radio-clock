@@ -9,60 +9,52 @@ open MonoTouch.UIKit
 
 module Clock =
 
-    let mutable stopped = true // can we just pause the timer instead?
-
     let face  = new UIView()
     let timer = new System.Timers.Timer(1000.0)
 
-    let hh        = new TwoDigits(24)
+    let hh        = new DoubleDigit(24)
     let c1        = Layout.label ":" Layout.bigFont
-    let mm        = new TwoDigits(60)
+    let mm        = new DoubleDigit(60)
     let c2        = Layout.label ":" Layout.bigFont
-    let ss        = new TwoDigits(60)
+    let ss        = new DoubleDigit(60)
 
     let setBtn    = Layout.button "Set"    UIColor.Green
     let cancelBtn = Layout.button "Cancel" UIColor.Red
 
     let time () =
-        new TimeSpan(hh.Value, mm.Value, ss.Value)
+        new TimeSpan(hh.value(), mm.value(), ss.value())
 
     let timeHHMM () =
-        new TimeSpan(hh.Value, mm.Value, 0)
+        new TimeSpan(hh.value(), mm.value(), 0)
 
     let isStopped () =
-        stopped
+        not timer.Enabled
 
     let start () =
-        timer.Start()   // sync needed?
-        stopped <- false
+        timer.Start()
 
     let stop () =
         timer.Stop()
-        stopped <- true
 
     let blink () =
-        hh.Blink()
-        mm.Blink()
-        ss.Blink()
+        hh.blink()
+        mm.blink()
+        ss.blink()
         face.SetNeedsLayout()
         face.LayoutIfNeeded()
 
     let stopBlink () =
-        hh.StopBlink()
-        mm.StopBlink()
-        ss.StopBlink()
+        hh.stopBlink()
+        mm.stopBlink()
+        ss.stopBlink()
         face.SetNeedsLayout()
         face.LayoutIfNeeded()
 
     let pulse () =
         let now = System.DateTime.Now
-        hh.Next(now.Hour)
-        mm.Next(now.Minute)
-        ss.Next(now.Second)
-
-    let is24Hours () =
-        let format = NSDateFormatter.GetDateFormatFromTemplate("j", uint32(0), NSLocale.CurrentLocale)
-        format.IndexOf('a') = -1
+        hh.next(now.Hour)
+        mm.next(now.Minute)
+        ss.next(now.Second)
 
     let showButtons show =
         setBtn.Hidden    <- not show
@@ -73,9 +65,9 @@ module Clock =
         let types = UIUserNotificationType.Alert
         let settings = UIUserNotificationSettings.GetSettingsForTypes(types, null)
         UIApplication.SharedApplication.RegisterUserNotificationSettings(settings)
-        hh.Next(Config.alarmTimes.Head.Hours)
-        mm.Next(Config.alarmTimes.Head.Minutes)
-        ss.Next(Config.alarmTimes.Head.Seconds)
+        hh.next(Config.alarmTimes.Head.Hours)
+        mm.next(Config.alarmTimes.Head.Minutes)
+        ss.next(Config.alarmTimes.Head.Seconds)
         showButtons true
         stop()
         blink()
@@ -103,8 +95,6 @@ module Clock =
         ]
         let formats = [
             "H:|[hh]-[c1(25)]-[mm(==hh)]-[c2(25)]-[ss(==hh)]|"
-//            "H:|[hh]-25-[mm(==hh)][set(==hh)]|"
-//            "H:|[hh]-25-[mm(==hh)][cancel(==hh)]|"
             "H:[set(150)]|"
             "H:[cancel(150)]|"
             "V:|[hh]|"

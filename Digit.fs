@@ -8,35 +8,22 @@ open MonoTouch.CoreText
 open MonoTouch.Foundation
 open MonoTouch.UIKit
 
-type Digit(digit: String) as self =
+/// Single digit with some animations: blink, animate to final position and animate away from final position.
+type Digit(digit: String) as this =
     inherit UILabel()
 
     let duration = 1.0
     let random = System.Random()
 
-//    let attrs = 
-//        new CTStringAttributes(
-//            Font = new CTFont("Helvetica-Bold", 30.0f),
-//            StrokeColor = UIColor.Black.CGColor,
-//            ForegroundColor= UIColor.White.CGColor,
-//            StrokeWidth =    Nullable -1.0f
-//        )
-//
-//    let attrText digit =
-//        new NSAttributedString(
-//            digit,
-//            attrs
-//        )
-
     do
-        self.TranslatesAutoresizingMaskIntoConstraints <- false
-        self.Font <- Layout.bigFont
-        self.Text <- digit
-        self.TextAlignment <- UITextAlignment.Center
-        self.BackgroundColor <- UIColor.Clear
-        self.TextColor <- UIColor.White
+        this.TranslatesAutoresizingMaskIntoConstraints <- false
+        this.Font            <- Layout.bigFont
+        this.Text            <- digit
+        this.TextAlignment   <- UITextAlignment.Center
+        this.BackgroundColor <- UIColor.Clear
+        this.TextColor       <- UIColor.White
 
-    member this.Blink() =
+    member this.blink () =
         // --- scale animation
         let scaleAnim = CABasicAnimation.FromKeyPath("transform.scale")
         scaleAnim.TimingFunction <- CAMediaTimingFunction.FromName(CAMediaTimingFunction.EaseInEaseOut)
@@ -44,13 +31,13 @@ type Digit(digit: String) as self =
         scaleAnim.RepeatCount <- 1000.0f
         scaleAnim.AutoReverses <- true
         scaleAnim.To <- NSNumber.FromDouble(1.5)
-        self.Layer.AddAnimation(scaleAnim, "blinkAnim")
+        this.Layer.AddAnimation(scaleAnim, "blinkAnim")
 
-    member this.StopBlink() =
-        self.Layer.RemoveAnimation("blinkAnim")
+    member this.stopBlink() =
+        this.Layer.RemoveAnimation("blinkAnim")
 
 
-    member this.AnimateIn() =
+    member this.animateIn() =
 
         // --- rotate animation
         let rotAnim = CABasicAnimation.FromKeyPath("transform.rotation")
@@ -59,7 +46,7 @@ type Digit(digit: String) as self =
         rotAnim.AutoReverses <- false
         rotAnim.From <- NSNumber.FromDouble(Math.PI/2.0)
         rotAnim.To <- NSNumber.FromDouble(0.0)
-        self.Layer.AddAnimation(rotAnim, "rotAnim")
+        this.Layer.AddAnimation(rotAnim, "rotAnim")
 
         // --- animate along curve
         let path = new UIBezierPath()
@@ -71,14 +58,14 @@ type Digit(digit: String) as self =
         anim.Duration <- 1.0
         anim.Path <- path.CGPath
         anim.TimingFunction <- CAMediaTimingFunction.FromName(CAMediaTimingFunction.EaseOut)
-        self.Layer.AddAnimation(anim, "moveAnim")
+        this.Layer.AddAnimation(anim, "moveAnim")
 
         // --- fade in
-        self.Alpha <- 0.0f
-        UIView.Animate(0.9, 0.0, UIViewAnimationOptions.CurveEaseIn, (fun () -> self.Alpha <- 1.0f), null)
+        this.Alpha <- 0.0f
+        UIView.Animate(0.9, 0.0, UIViewAnimationOptions.CurveEaseIn, (fun () -> this.Alpha <- 1.0f), null)
 
   
-    member this.AnimateOut() =
+    member this.animateOut() =
 
         // --- scale animation
         let scaleAnim = CABasicAnimation.FromKeyPath("transform.scale")
@@ -87,7 +74,7 @@ type Digit(digit: String) as self =
         scaleAnim.RepeatCount <- 1.0f
         scaleAnim.AutoReverses <- true
         scaleAnim.To <- NSNumber.FromDouble(1.8)
-        self.Layer.AddAnimation(scaleAnim, "scaleAnim")
+        this.Layer.AddAnimation(scaleAnim, "scaleAnim")
 
         // --- rotate animation
         let rotAnim = CABasicAnimation.FromKeyPath("transform.rotation")
@@ -98,7 +85,7 @@ type Digit(digit: String) as self =
         rotAnim.RemovedOnCompletion <- true
         rotAnim.From <- NSNumber.FromDouble(0.0)
         rotAnim.To <- NSNumber.FromDouble(Math.PI/2.0)
-        self.Layer.AddAnimation(rotAnim, "rotAnim")
+        this.Layer.AddAnimation(rotAnim, "rotAnim")
 
         // --- animate along curve
         let path = new UIBezierPath()
@@ -112,14 +99,16 @@ type Digit(digit: String) as self =
         anim.TimingFunction <- CAMediaTimingFunction.FromName(CAMediaTimingFunction.EaseIn)
         //anim.RotationMode <- CAKeyFrameAnimation.RotateModeAuto.ToString()
         anim.RemovedOnCompletion <- true
-        self.Layer.AddAnimation(anim, "moveAnim")
+        this.Layer.AddAnimation(anim, "moveAnim")
 
         // --- fade out
-        self.Alpha <- 1.0f
-        UIView.Animate(0.9, 0.0, UIViewAnimationOptions.CurveEaseOut, (fun () -> self.Alpha <- 0.0f), null)
+        this.Alpha <- 1.0f
+        UIView.Animate(0.9, 0.0, UIViewAnimationOptions.CurveEaseOut, (fun () -> this.Alpha <- 0.0f), null)
 
 
-type Digit2 (up: NSAction, down: NSAction) as this =
+/// Animated digit that uses two digits to create the effet of a "new" digit 
+/// moving into place while the "old" one moves away.
+type AnimatedDigit (up: NSAction, down: NSAction) as this =
     inherit UIView()
 
     let mutable d = 0
@@ -160,16 +149,16 @@ type Digit2 (up: NSAction, down: NSAction) as this =
     member this.Label0 = label0
     member this.Label1 = label1
 
-    member this.StopBlink() =
-        label1.StopBlink()
+    member this.stopBlink () =
+        label1.stopBlink ()
 
-    member this.Blink() =
-        label1.Blink()
+    member this.blink () =
+        label1.blink ()
 
-    member this.Next(next: int) =
+    member this.next(next: int) =
         label0.InvokeOnMainThread((fun _ ->
-                label0.AnimateOut()
-                label1.AnimateIn()
+                label0.animateOut()
+                label1.animateIn()
                 label0.Text <- d.ToString()
                 label1.Text <- (next.ToString())
                 d <- next
@@ -177,15 +166,15 @@ type Digit2 (up: NSAction, down: NSAction) as this =
             )
 
 
-type TwoDigits(maxValue: int) as this =
+/// Combine two animated digits to allow representing hours, minutes and seconds.
+type DoubleDigit (maxValue: int) as this =
     inherit UIView()
 
-    let down x  = new NSAction(fun _ -> this.Down(x))
-    let up   x  = new NSAction(fun _ -> this.Up(x))
+    let downF x  = new NSAction(fun _ -> this.down(x))
+    let upF   x  = new NSAction(fun _ -> this.up(x))
 
-    let d1      = new Digit2(down(10), up(10))
-    let d0      = new Digit2(down(1), up(1))
-
+    let d1      = new AnimatedDigit(downF(10), upF(10))
+    let d0      = new AnimatedDigit(downF(1),  upF(1))
 
     do
         this.TranslatesAutoresizingMaskIntoConstraints <- false
@@ -202,22 +191,23 @@ type TwoDigits(maxValue: int) as this =
 
         Layout.layout this formats views
 
-    member this.Blink() =
-        d1.Blink()
-        d0.Blink()
+    member this.blink () =
+        d1.blink ()
+        d0.blink ()
 
-    member this.StopBlink() =
-        d1.StopBlink()
-        d0.StopBlink()
+    member this.stopBlink () =
+        d1.stopBlink ()
+        d0.stopBlink ()
 
-    member this.Value = d1.Digit * 10 + d0.Digit
+    member this.value () = 
+        d1.Digit * 10 + d0.Digit
 
-    member this.Next(d: int) = 
-        if d1.Digit <> d/10 then d1.Next(d/10)
-        if d0.Digit <> d%10 then d0.Next(d%10)
+    member this.next (d: int) = 
+        if d1.Digit <> d/10 then d1.next (d/10)
+        if d0.Digit <> d%10 then d0.next (d%10)
 
-    member this.Up(x: int)   =
-        if this.Value + x < maxValue then this.Next(this.Value + x) else this.Next(0)
+    member this.up (x: int) =
+        if this.value() + x < maxValue then this.next(this.value() + x) else this.next 0
 
-    member this.Down(x: int) = 
-        if (this.Value - x) >= 0 then this.Next(this.Value - x) else this.Next(maxValue - 1)
+    member this.down (x: int) = 
+        if this.value() - x >= 0 then this.next(this.value() - x) else  this.next(maxValue - 1)
