@@ -70,10 +70,6 @@ module WeatherStation =
     let temperature (xml: XmlDocument) : (float * float * float) = 
       (Math.Round(float(value (xml, "temperature", "day"))), Math.Round(float(value (xml, "temperature", "min"))), Math.Round(float(value (xml, "temperature", "max"))))
 
-//    let humidity xml = float(value (xml, "humidity", "value"))
-
-//    let weather xml = value (xml, "weather", "value")
-
     let icon xml = iconForId (value (xml, "symbol", "var"))
 
     let location(xml: XmlDocument): string = (xml.SelectSingleNode("/weatherdata/location/name")).InnerText

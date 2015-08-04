@@ -48,7 +48,7 @@ module RssFeed =
                 | []    ->
                    match items url with                    // once we run out, load a fresh batch of news
                     | n::ns -> Some(Some(n), ns)
-                    | []    -> Some(None,   items(url))    // shouldn't happen, but need to cover all match cases
+                    | []    -> Some(None,    (items url))  // shouldn't happen, but need to cover all match cases
         ) []
         |> Seq.choose id
 

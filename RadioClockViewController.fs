@@ -92,7 +92,7 @@ type RadioClockViewController() =
 
     override this.TouchesBegan(touches, event) =
         // toggle toolbar when user touches screen EXCEPT for the case where the
-        //  clock is stopped in order to let the user enter a new alarm time
+        // clock is stopped in order to let the user enter a new alarm time
         if (not (Clock.isStopped())) then
             this.NavigationController.ToolbarHidden <- not this.NavigationController.ToolbarHidden
 
